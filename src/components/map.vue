@@ -3,34 +3,17 @@
     element-loading-text="加载中"
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)">
+    <!-- 地图 -->
    <div id="map" 
     v-loading="positioning"
     element-loading-text="定位中"
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)">
    </div>
-   <div class="mapPanel">
-    <el-popover
-      placement="bottom"
-      title="当前城市"
-      width="200"
-      :content="address">
-      <span slot="reference" class="reference">{{district || '未知'}}</span>
-    </el-popover>
-    <el-divider direction="vertical"></el-divider>
-    <el-popover
-      v-model="colorVisible"
-      placement="bottom"
-      width="200">
-      <el-radio-group v-model="mapColor">
-        <el-radio  v-for="item in colorMap" :label="item.value" :key="item.value">{{item.type}}</el-radio>
-      </el-radio-group>
-      
-      <span slot="reference" class="reference">地图</span>
-    </el-popover>
-    <el-divider direction="vertical"></el-divider>
-    <span @click="getPosition" class="reference">定位</span>
-  </div>
+
+   <!-- 头部工具栏 -->
+   <y-mapPanel :address ="address" :district="district" @changeMapColor="handleColorChange"/>
+
   <div class="route" v-if="false">
      <el-input v-model="routeFrom" placeholder="起  请输入起点" id="routeFrom">
 
@@ -40,16 +23,24 @@
      <el-input v-model="routeTo" placeholder="终  请输入终点" id="routeTo"></el-input>
      <el-button type="primary" @click="beginRoute" class="beginRoute"><span>开始</span></el-button>
   </div>
+
+<!-- 底部开始按钮 -->
   <div class="beginTripSelf">
-     <el-button  type="primary" @click="showTripStart = true">开始</el-button>
+     <el-button  type="primary" @click="handleClick">{{buttonText}}</el-button>
   </div>
-  <y-tripStart v-if="showTripStart"/>
+
+  <!-- 位置跟踪遮罩层 -->
+  <transition name="slide"> 
+     <y-tripStart v-if="showTripStart" ref="tripStart" :map="map" :tripType="tripType"/>
+  </transition>
+ 
  </div>
   
 </template>
 <script>
 import { mapState } from "vuex";
 import TripStart from "./tripStart.vue";
+import MapPanel from "./mapPanel.vue"
 const typeMap = {
   徒步: "Walking",
   跑步: "walking",
@@ -62,7 +53,8 @@ const typeMap = {
 export default {
   name: "y-map",
   components: {
-    "y-tripStart": TripStart
+    "y-tripStart": TripStart,
+    "y-mapPanel": MapPanel
   },
   props: {
     tripType: {
@@ -70,75 +62,45 @@ export default {
       require: true
     }
   },
-  computed: {
-    mapColor: {
-      get: function(){
-         return this.$store.state.mapColor
-      },
-      set: function(value){
-        this.$store.commit("setMapColor", value);
-        localStorage.setItem("mapColor", this.mapColor);
-        this.map.setMapStyle(`amap://styles/${this.mapColor}`);
-        this.colorVisible = false;
-      }
-    }
-  },
+  
   data() {
     return {
       // mapColor: this.mapColor,
       map: null,
       address: "",
       district: "",
-      colorMap: [
-        {
-          type: "标准",
-          value: "normal"
-        },
-        {
-          type: "幻影黑",
-          value: "dark"
-        },
-        {
-          type: "月光银",
-          value: "light"
-        },
-        {
-          type: "远山黛",
-          value: "whitesmoke"
-        },
-        {
-          type: "雅士灰",
-          value: "grey"
-        },
-        {
-          type: "马卡龙",
-          value: "macaron"
-        },
-        {
-          type: "靛青蓝",
-          value: "blue"
-        },
-        {
-          type: "极夜蓝",
-          value: "darkblue"
-        }
-      ],
+      
       positioning: false,
       loading: true,
-      colorVisible: false,
       routeFrom: "",
       routeTo: "",
       routeCoordinate: {},
       marker: null,
       longitude: "",
       latitude: "",
-      showTripStart: false
+      showTripStart: false,
+      buttonText: "开始"
     };
   },
   watch: {
     
   },
   methods: {
+    handleClick(){
+      if(this.buttonText === "开始"){
+        this.buttonText = "结束";
+        this.showTripStart = true
+      } else if (this.buttonText === '结束'){
+        this.buttonText = '退出';
+        this.$refs.tripStart.tripEnd(this);
+      }else {
+       this.buttonText = "开始";
+       this.$emit("backToTrip", this.$refs.tripStart.distance)
+      }
+    },
+    handleColorChange(value){
+      this.map.setMapStyle(`amap://styles/${value}`);
+    },
     reverseRoute() {
       [this.routeFrom, this.routeTo] = [this.routeTo, this.routeFrom];
       let temp = JSON.parse(JSON.stringify(this.routeCoordinate));
@@ -171,9 +133,9 @@ export default {
       var self = this;
       this.map = new AMap.Map("map", {
         resizeEnable: true,
-        zoom: 13
+        zoom: 17
       });
-      this.map.setMapStyle(`amap://styles/${this.mapColor}`);
+      this.map.setMapStyle(`amap://styles/${this.$store.state.mapColor}`);
 
       // 添加缩小放大
       this.map.plugin("AMap.ToolBar", function() {
@@ -269,17 +231,6 @@ export default {
 
       // 将创建的点标记添加到已有的地图实例：
       this.map.add(this.marker);
-    },
-    toGaodeCor(gps) {
-      return new Promise((resolve, reject) => {
-        AMap.convertFrom(gps, "gps", function(status, result) {
-          if (result.info === "ok") {
-            resolve(result.locations[0]); // Array.<LngLat>
-          } else {
-            reject("err");
-          }
-        });
-      });
     }
   },
   mounted() {
@@ -306,19 +257,7 @@ export default {
     height: 100%;
     z-index: 1;
   }
-  .mapPanel {
-    position: fixed;
-    top: 36px;
-    z-index: 2;
-    background-color: white;
-    left: 9%;
-    span.reference {
-      padding: 7px 26px;
-      outline: none;
-      display: inline-block;
-      cursor: pointer;
-    }
-  }
+  
   .route {
     position: fixed;
     top: 100px;
@@ -336,11 +275,28 @@ export default {
     width: 40%;
     left: 50%;
     transform: translate(-50%);
-    z-index: 2;
+    z-index: 4;
     button{
       display: inline-block;
       width: 100%;
     }
   }
 }
+
+// 动画
+.slide-enter-active {
+  animation: fade-in .5s;
+}
+@keyframes  fade-in{
+  0% {
+    height: 0;
+  } 
+  50% {
+    height: 50%;
+  }
+  100% {
+    height: 100%;
+  }
+}
+
 </style>

@@ -1,7 +1,9 @@
 import Map from './map.vue';
+import Dialog from './dialog.vue'
 
 const components =[
-  Map
+  Map,
+  Dialog
 ];
 
 const plugins = {

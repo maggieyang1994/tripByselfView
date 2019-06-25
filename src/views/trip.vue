@@ -2,7 +2,7 @@
    <div class="tripWrapper">
      <div class="tab" v-if="!showMap">
        <el-tabs v-model="activeTab"  :stretch="true">
-        <el-tab-pane  v-for="item in tripData" :label="item.tripType" :name="item.tripType" :key="item.tripType">
+        <el-tab-pane  v-for="item in tripData" :label="item.tripType.substring(0,2)" :name="item.tripType" :key="item.tripType">
           <!-- {{item.distance}} -->
           <div class="tripCenter">
             <p>累计{{item.tripType}}</p>
@@ -10,24 +10,27 @@
             <p>本月累计{{item.tripType}}{{item.distance}}公里</p>
           </div>
           <div class="beginTrip">
-            <el-button type="primary" @click="beginTrip()">开始{{item.tripType}}</el-button>
+            <el-button type="primary" @click="beginTrip()">开始{{item.tripType.substring(0,2)}}</el-button>
           </div>
         </el-tab-pane>
        </el-tabs>
        
      </div>
      <div class="tripMap" v-else>
-        <y-map :tripType="activeTab"/>
+        <y-map :tripType="activeTab"  @backToTrip="handlerBackToTrip"/>
      </div>
  </div>
 </template>
 <script>
+// const bottomTripMap = {
+//   icon
+// }
 import axios from 'axios'
 export default {
   name: "trip",
   data() {
     return {
-      activeTab: '徒步',
+      activeTab: '徒步出行',
       tripData: [],
       showMap: false
     }
@@ -35,10 +38,14 @@ export default {
   methods: {
     beginTrip(){
       this.showMap = true
+    },
+    handlerBackToTrip(distance){
+      this.showMap = false;
+      this.tripData.find(x => x.tripType === this.activeTab).distance + distance
     }
   },
   mounted(){
-    axios.get("http://localhost:4000/trip").then(res => {
+    axios.get("http://localhost:4000/trip/getTrips").then(res => {
       this.tripData = res.data
     })
   }
@@ -68,6 +75,12 @@ export default {
   .tripMap{
     height:100%
   }
+}
+
+div.el-message-box {
+  width: 100%!important;
+  word-break: break-all;
+  word-wrap: break-word;
 }
 
 </style>

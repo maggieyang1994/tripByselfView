@@ -6,7 +6,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     userInfo: JSON.parse(localStorage.getItem("userInfo") || '{}'),
-    mapColor: localStorage.getItem("mapColor") || 'normal'
+    mapColor: localStorage.getItem("mapColor") || 'normal',
+    dialogMap: {}
   },
   mutations: {
     setUserInfo(state, data){
@@ -14,6 +15,10 @@ export default new Vuex.Store({
     },
     setMapColor(state,data) {
       state.mapColor = data
+    },
+    setDialogMap(state, data){
+      // state.dialogMap = {};
+      state.dialogMap = JSON.parse(JSON.stringify(data))
     }
   },
   actions: {

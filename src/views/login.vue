@@ -36,7 +36,7 @@ export default {
   },
   methods: {
     login(){
-      axios.get("http://localhost:4000/users", {
+      axios.get("http://localhost:4000/user/getUserDetail", {
         params: {
           userName: this.userName,
           password: this.password
@@ -51,6 +51,8 @@ export default {
           this.checked && localStorage.setItem("password", JSON.stringify(this.password));
           this.$router.push({name: 'trip'})
         }
+      }).catch(e => {
+        console.log(e)
       })
     }
   }
