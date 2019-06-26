@@ -1,9 +1,11 @@
 import Map from './map.vue';
 import Dialog from './dialog.vue'
+import SvgIcon from './SvgIcons.vue'
 
 const components =[
   Map,
-  Dialog
+  Dialog,
+  SvgIcon
 ];
 
 const plugins = {

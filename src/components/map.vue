@@ -12,20 +12,50 @@
    </div>
 
    <!-- 头部工具栏 -->
-   <y-mapPanel :address ="address" :district="district" @changeMapColor="handleColorChange"/>
+   <y-mapPanel :address ="address" :district="district" @changeMapColor="handleColorChange"  v-if="!showRoute"/>
 
-  <div class="route" v-if="false">
-     <el-input v-model="routeFrom" placeholder="起  请输入起点" id="routeFrom">
+  <div class="route"  v-if="showRoute">
+    <el-form :model="ruleForm" :rules="rules" labelWidth="0" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+     <div style="display:flex">
+      <el-form-item  prop="routeFrom" style="flex: 1">
+        <el-input v-model="ruleForm.routeFrom" placeholder="起  请输入起点" id="routeFrom" ></el-input>
+      </el-form-item>
+
+   <el-form-item  prop="trafficType" style="width: 30%">
+       <el-select v-model="ruleForm.trafficType" placeholder="请选择出行方式" >
+          <el-option
+            v-for="item in tripTypeMap"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+    </el-form-item>
+     </div>
+<!-- reverse按钮 -->
+     <i class="el-icon-sort reverseButton" @click="reverseRoute"></i>
 
 
-     </el-input>
-     <i class="el-icon-sort" @click="reverseRoute"></i>
-     <el-input v-model="routeTo" placeholder="终  请输入终点" id="routeTo"></el-input>
-     <el-button type="primary" @click="beginRoute" class="beginRoute"><span>开始</span></el-button>
+    <div style="display:flex">
+       <el-form-item  prop="routeTo" style="flex: 1"> <el-input v-model="ruleForm.routeTo" placeholder="终  请输入终点" id="routeTo"> </el-input></el-form-item>
+       <el-form-item  prop="selectedPolicy" style="width: 30%">
+         <el-select v-model="ruleForm.selectedPolicy" placeholder="请选择规划策略"  :disabled="ruleForm.trafficType === 'Walking'">
+          <el-option
+            v-for="item in currentPolicyOption"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
+     </div>
+   
+      <el-button type="primary" @click="beginRoute('ruleForm')"><span>搜索</span></el-button>
+    </el-form>
   </div>
 
 <!-- 底部开始按钮 -->
-  <div class="beginTripSelf">
+  <div class="beginTripSelf" v-if="!showRoute">
      <el-button  type="primary" @click="handleClick">{{buttonText}}</el-button>
   </div>
 
@@ -40,13 +70,8 @@
 <script>
 import { mapState } from "vuex";
 import TripStart from "./tripStart.vue";
-import MapPanel from "./mapPanel.vue"
-const typeMap = {
-  徒步: "Walking",
-  跑步: "walking",
-  骑行: "Riding",
-  自驾: "Driving"
-};
+import MapPanel from "./mapPanel.vue";
+
 // const policyMap = {
 //   'Walking':
 // }
@@ -58,12 +83,17 @@ export default {
   },
   props: {
     tripType: {
-      type: String,
-      require: true
+      type: String
+    },
+    showRoute: {
+      type: Boolean,
+      default: false
     }
   },
   
   data() {
+    const tripTypeMap = JSON.parse('[{"value":"Walking","label":"步行"},{"value":"Transfer","label":"公交/地铁"},{"value":"Riding","label":"骑行"},{"value":"Driving","label":"自驾"}]');
+    
     return {
       // mapColor: this.mapColor,
       map: null,
@@ -72,18 +102,45 @@ export default {
       
       positioning: false,
       loading: true,
-      routeFrom: "",
-      routeTo: "",
       routeCoordinate: {},
       marker: null,
       longitude: "",
       latitude: "",
       showTripStart: false,
-      buttonText: "开始"
+      tripTypeMap,
+      policyMap: {},
+      currentPolicyOption: [],
+      ruleForm: {
+        routeFrom: '',
+        routeTo: '',
+        trafficType: 'Walking',
+        selectedPolicy: ''
+      },
+      rules: {
+        routeFrom: [
+          {required: true, message: "请输入起点", trigger: "change"}
+        ],
+        routeTo: [
+          {required: true, message: "请输入终点", trigger: "change"}
+        ],
+        selectedPolicy: [
+          {required: true, message: "请输入出行策略", trigger: "change"}
+        ]
+      }
     };
   },
-  watch: {
+  // computed: {
     
+  // },
+  watch: {
+   'ruleForm.trafficType': {
+     handler: function(newV){
+       this.selectedPolicy = ''
+       this.policyMap[newV] && this.policyMap[newV].length && (this.currentPolicyOption = this.policyMap[newV])
+     }, 
+     // 代表在wacth里声明了这个方法之后立即先去执行handler方法
+    immediate: true
+   }
   },
   methods: {
     handleClick(){
@@ -107,27 +164,34 @@ export default {
       this.routeCoordinate.routeFrom = temp.routeTo;
       this.routeCoordinate.routeTo = temp.routeFrom;
     },
-    beginRoute() {
-      // 开始路线规划
-      var self = this;
-      console.log(self.routeFrom, self.routeTo);
-      AMap.plugin("AMap.Driving", function() {
-        // 设置驾车路线规划策略
+    beginRoute(formName) {
 
-        var driving = new AMap.Driving({
-          // 驾车路线规划策略，AMap.DrivingPolicy.LEAST_TIME是最快捷模式
-          policy: AMap.DrivingPolicy.LEAST_TIME
-        });
+      // 开始验证
+      this.$refs[formName].validate((valid) => {
+         if(!valid) return false;
+         // 验证通过   开始路线规划
+          var self = this;
+          console.log(self.routeFrom, self.routeTo);
+          AMap.plugin(`AMap[${this.ruleForm.trafficType}]`, function() {
+            // 设置驾车路线规划策略
 
-        driving.search(
-          self.routeCoordinate.routeFrom,
-          self.routeCoordinate.routeTo,
-          function(status, result) {
-            // 未出错时，result即是对应的路线规划方案
-            console.log(status, result);
-          }
-        );
+            var driving = new AMap[this.ruleForm.trafficType]({
+              // 驾车路线规划策略，AMap.DrivingPolicy.LEAST_TIME是最快捷模式
+              policy: AMap.DrivingPolicy.LEAST_TIME
+            });
+            driving.search(
+              self.routeCoordinate.routeFrom,
+              self.routeCoordinate.routeTo,
+              function(status, result) {
+                // 未出错时，result即是对应的路线规划方案
+                console.log(status, result);
+              }
+            );
+          });
       });
+
+
+      
     },
     async init() {
       var self = this;
@@ -147,8 +211,10 @@ export default {
       await this.getPosition();
 
       // 添加输入提示
-      // self.placeSearch("routeFrom");
-      // self.placeSearch("routeTo");
+      if(this.showRoute) {
+        self.placeSearch("routeFrom");
+        self.placeSearch("routeTo");
+      }
     },
     placeSearch(key) {
       var self = this;
@@ -231,7 +297,14 @@ export default {
 
       // 将创建的点标记添加到已有的地图实例：
       this.map.add(this.marker);
-    }
+    },
+   async getDrivingPlugin(trafficType){
+     return new Promise((resolve, reject) => {
+       this.map.plugin(`AMap.${trafficType}`, function(){
+         resolve();
+       })
+     })
+   }
   },
   mounted() {
     // 动态加载js
@@ -242,10 +315,30 @@ export default {
       "https://webapi.amap.com/maps?v=1.4.15&key=651f51a67d2e3cdaaea1e63d784cec0a"
     );
     document.head.appendChild(aMapScript);
-    aMapScript.onload = function() {
-      self.init();
+    aMapScript.onload = async function() {
+      await self.init();
       self.loading = false;
+      if(self.showRoute){
+         // 初始化 规划插件
+        let tempMap = self.tripTypeMap.map(x => self.getDrivingPlugin(x.value));
+        Promise.all(tempMap).then(res => {
+          self.policyMap = self.tripTypeMap.map(x => x.value).filter(x => x !=='Walking').reduce((o, item) => {
+              let temp =  AMap[item + 'Policy'];
+              let arr = []
+              for(let  key in temp){
+                arr.push({
+                  value: key,
+                  label: key
+                })
+              }
+              o[item] = arr;
+              return o
+          }, {})
+        })
+      }
     };
+
+   
   }
 };
 </script>
@@ -260,14 +353,22 @@ export default {
   
   .route {
     position: fixed;
-    top: 100px;
+    top: 0px;
     z-index: 2;
-    width: 60%;
+    width: 100%;
+    padding-bottom:20px;
+    background-color:white;
     // left: 50%;
     // transform: translate(-50%);
-    .beginRoute {
-      margin-top: 30px;
+    
+    // .trafficType .el-input__suffix{
+    //   width: 30%
+    // }
+    .reverseButton{
+      display:block;
+      margin-top:-16px;
     }
+    
   };
   .beginTripSelf{
     position: fixed;

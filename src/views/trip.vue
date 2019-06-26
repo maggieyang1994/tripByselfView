@@ -1,6 +1,7 @@
 <template>
    <div class="tripWrapper">
      <div class="tab" v-if="!showMap">
+       <!--  顶部导航 -->
        <el-tabs v-model="activeTab"  :stretch="true">
         <el-tab-pane  v-for="item in tripData" :label="item.tripType.substring(0,2)" :name="item.tripType" :key="item.tripType">
           <!-- {{item.distance}} -->
@@ -16,9 +17,8 @@
        </el-tabs>
        
      </div>
-     <div class="tripMap" v-else>
-        <y-map :tripType="activeTab"  @backToTrip="handlerBackToTrip"/>
-     </div>
+    
+       <router-view/>
  </div>
 </template>
 <script>
@@ -35,14 +35,21 @@ export default {
       showMap: false
     }
   },
+  watch: {
+    '$route.params': {
+      handler: function(newV){
+        let {showMap, distance} = newV;
+        if(distance) this.tripData.find(x => x.tripType === this.activeTab).distance = this.tripData.find(x => x.tripType === this.activeTab).distance + distance * 1;
+        if(showMap === false) this.showMap = false
+      },
+      deep: true
+    }
+  },
   methods: {
     beginTrip(){
       this.showMap = true
+      this.$router.push({name: 'tripMap', params: {tripType: this.activeTab}})
     },
-    handlerBackToTrip(distance){
-      this.showMap = false;
-      this.tripData.find(x => x.tripType === this.activeTab).distance + distance
-    }
   },
   mounted(){
     axios.get("http://localhost:4000/trip/getTrips").then(res => {

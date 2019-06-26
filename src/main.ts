@@ -6,7 +6,7 @@ import element from 'element-ui';
 import plugins from './components/index.js';
 import 'element-ui/lib/theme-chalk/index.css';
 // iconfont
-import './assets/css/iconfont.css'
+import "./icons"
 
 Vue.use(element)
 Vue.use(plugins)

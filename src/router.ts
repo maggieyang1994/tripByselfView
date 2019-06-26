@@ -3,6 +3,12 @@ import Router from 'vue-router'
 import store from "./store";
 import Login from './views/login.vue'
 import Trip from './views/trip.vue'
+import TripMap from './views/tripMap.vue'
+
+
+import Traffic from './views/traffic.vue'
+import History from './views/history.vue'
+import Myinfo from './views/myinfo.vue'
 
 Vue.use(Router)
 
@@ -18,9 +24,33 @@ Vue.use(Router)
     {
       path: '/trip',
       name: Trip.name,
-      component: Trip
+      component: Trip,
+      props: true,
+      children: [
+        {
+          path: 'tripMap',
+          component: TripMap,
+          name: TripMap.name,
+          props: true
+        }
+      ]
+    },
+    {
+      path: '/traffic',
+      name: Traffic.name,
+      component: Traffic
+    },
+    {
+      path: '/history',
+      name: History.name,
+      component: History
+    },
+    {
+      path: '/myinfo',
+      name: Myinfo.name,
+      component: Myinfo
     }
-  ],
+  ]
   
 })
 router.beforeEach((to, from, next) => {
