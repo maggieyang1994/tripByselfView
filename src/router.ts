@@ -17,6 +17,12 @@ Vue.use(Router)
   base: process.env.BASE_URL,
   routes: [
     {
+      path: '/',
+      name: Trip.name,
+      component: Trip,
+      props: true,
+    },
+    {
       path: '/login',
       name: Login.name,
       component: Login

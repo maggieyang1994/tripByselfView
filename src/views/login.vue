@@ -67,6 +67,7 @@ export default {
   position: absolute;
   top: 0;
   bottom: 0;
+  z-index:2;
   .logo {
     margin-top:40%;
     margin-bottom:10%;

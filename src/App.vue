@@ -10,8 +10,9 @@
       <el-tabs v-model="activeName" @tab-click="handleClick" :stretch="true">
         <el-tab-pane  :name="item.name" v-for="item in routerList" :key="item.text">
           <div slot="label">
-            <div class="lableP"><svg-icon :iconClass="item.icon" :iconColor = "item.name===activeName? '#409EFF': 'black'"></svg-icon></div>
-            <div class="lableP" :style="{color: item.name===activeName? '#409EFF': 'black'}">{{item.text}}</div>
+            <!-- <div class="lableP"><svg-icon :iconClass="item.icon" :iconColor = "item.name===activeName? '#409EFF': 'black'"></svg-icon></div> -->
+             <span slot="label"><svg-icon :iconClass="item.icon" :iconColor = "item.name===activeName? '#409EFF': 'black'"></svg-icon>{{item.text}}</span>
+            <!-- <div class="lableP" :style="{color: item.name===activeName? '#409EFF': 'black'}">{{item.text}}</div> -->
           </div>
         
         </el-tab-pane>

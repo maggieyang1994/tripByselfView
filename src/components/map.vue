@@ -3,8 +3,10 @@
     element-loading-text="加载中"
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)">
+ 
     <!-- 地图 -->
    <div id="map" 
+    
     v-loading="positioning"
     element-loading-text="定位中"
     element-loading-spinner="el-icon-loading"
@@ -14,7 +16,7 @@
    <!-- 头部工具栏 -->
    <y-mapPanel :address ="address" :district="district" @changeMapColor="handleColorChange"  v-if="!showRoute"/>
 
-  <div class="route"  v-if="showRoute">
+  <div class="route"  v-if="showRoute" @click="clickOutSide">
     <el-form :model="ruleForm" :rules="rules" labelWidth="0" ref="ruleForm" label-width="100px" class="demo-ruleForm">
      <div style="display:flex">
       <el-form-item  prop="routeFrom" style="flex: 1">
@@ -63,6 +65,72 @@
   <transition name="slide"> 
      <y-tripStart v-if="showTripStart" ref="tripStart" :map="map" :tripType="tripType"/>
   </transition>
+
+  <!-- 路线规划结果 -->
+  <div   id="panelWrapper" :style="{height: isPanelCollapse ? '50%': '4%'}" v-show="showPanel">
+    <div  class="collapse">
+      <span>请选择合适路线</span>
+      <span></span>
+      <svg-icon :iconClass="isPanelCollapse? 'ico-two-down-arrow': 'ico-two-up-arrow'" @click="isPanelCollapse=!isPanelCollapse"></svg-icon>
+      <el-button @click="confirm" type ="primary" size="mini">确定</el-button>
+    </div>
+    <div>
+      <div id ="panel"></div>
+    </div>
+  </div>
+
+
+  <!-- 确认dialog -->
+ <div  class="saveConfirmDialog">
+     <el-dialog
+        title="本次出行"
+        :visible.sync="dialogVisible"
+        width="87%">
+        <div style="display:flex;justify-content: space-between">
+          <span>交通方式</span>
+          <span>{{ruleForm.trafficType}}</span>
+        </div>
+        <div style="display:flex;justify-content: space-between">
+          <span>出发地</span>
+          <span>{{ruleForm.routeFrom}}</span>
+        </div>
+        <div style="display:flex;justify-content: space-between">
+          <span>目的地</span>
+          <span>{{ruleForm.routeTo}}</span>
+        </div>
+        <div style="display:flex;justify-content: space-between">
+          <span>花费</span>
+          <el-input-number v-model="spend"  :min="1"></el-input-number>
+        </div>
+        <div style="display:flex;justify-content: space-between">
+          <span>日期</span>
+          <span>{{curDate}}</span>
+        </div>
+        <div style="display:flex;justify-content: space-between">
+          <span style="width: 12%">备注</span>
+          <el-input v-model="remarks"></el-input>
+        </div>
+
+        <!--  嵌套dialog -->
+        <el-dialog
+          title="保存失败"
+          :visible="!!saveErrorMessage"
+          append-to-body
+          width="85%"
+          >
+          <span>{{saveErrorMessage}}</span>
+          <span slot="footer" class="dialog-footer">
+          
+            <el-button type="primary" @click="saveErrorMessage=''">确 定</el-button>
+          </span>
+        </el-dialog>
+
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="confirmSave">确认保存</el-button>
+        </span>
+      </el-dialog>
+ </div>
  
  </div>
   
@@ -71,7 +139,8 @@
 import { mapState } from "vuex";
 import TripStart from "./tripStart.vue";
 import MapPanel from "./mapPanel.vue";
-
+import dayjs from 'dayjs';
+import axios from 'axios';
 // const policyMap = {
 //   'Walking':
 // }
@@ -99,7 +168,7 @@ export default {
       map: null,
       address: "",
       district: "",
-      
+      buttonText: "开始",
       positioning: false,
       loading: true,
       routeCoordinate: {},
@@ -110,6 +179,15 @@ export default {
       tripTypeMap,
       policyMap: {},
       currentPolicyOption: [],
+      showPanel: false,
+      remarks:'',
+      spend: 0,
+      dialogVisible: false,
+      saveErrorMessage:"",
+      curDate: '',
+      trafficDistance: '',
+      isPanelCollapse: true,
+      trafficTime: "",
       ruleForm: {
         routeFrom: '',
         routeTo: '',
@@ -124,7 +202,7 @@ export default {
           {required: true, message: "请输入终点", trigger: "change"}
         ],
         selectedPolicy: [
-          {required: true, message: "请输入出行策略", trigger: "change"}
+          {required: true, message: "请选择出行策略", trigger: "change"}
         ]
       }
     };
@@ -135,14 +213,69 @@ export default {
   watch: {
    'ruleForm.trafficType': {
      handler: function(newV){
-       this.selectedPolicy = ''
-       this.policyMap[newV] && this.policyMap[newV].length && (this.currentPolicyOption = this.policyMap[newV])
+       this.ruleForm.selectedPolicy = newV ===  'Walking' ? 'Default': '';
+       this.policyMap[newV] && this.policyMap[newV].length && (this.currentPolicyOption = this.policyMap[newV]);
+      //  this.computeRules = newV === 'Walking' ? {routeFrom: this.rules.routeFrom,routeTo: this.rules.routeTo}: this.rules;
+      //  console.log(this.computeRules)
      }, 
      // 代表在wacth里声明了这个方法之后立即先去执行handler方法
     immediate: true
    }
   },
   methods: {
+    clickOutSide(e){
+      document.querySelector("#panel") && (document.querySelector("#panel").innerHTML = '')
+      // this.showPanel && (this.showPanel = false)
+    },
+    confirm(){
+      // 存到数据库
+      // 清空输入框
+     
+      this.curDate = dayjs().format("YYYY-MM-DD hh:ss")
+      this.dialogVisible = true
+    },
+    confirmSave(){
+      // 保存到数据库
+      let params = {
+        userId: this.$store.state.userInfo[0].userId,
+        type: 'traffic',
+        tripType: this.ruleForm.trafficType,
+        distance: this.trafficDistance,
+        time: this.trafficTime,
+        date: this.curDate,
+        Calorie: this.Calories,
+        price: this.spend,
+        startPlace: this.routeFrom,
+        endPlace: this.routeTo,
+        startCode: this.routeCoordinate.routeFrom,
+        endCode: this.routeCoordinate.routeTo,
+        mark: this.remarks
+
+      };
+      axios.post("http://localhost:4000/trip/saveTrip", params).then(res => {
+        console.log(res);
+        if(res.data.code){
+           this.$message({
+            showClose: true,
+            message:'保存成功,此次记录已经上传',
+            type:  'success'
+          })
+          this.showPanel = false;
+          this.ruleForm.routeTo = '';
+          this.ruleForm.routeFrom = '';
+          this.$refs['ruleForm'].resetFields();
+          this.dialogVisible = false
+        } else {
+        //   this.$alert(`<span style="color:red">${res.data.error}</span>`, '保存失败', {
+        //   dangerouslyUseHTMLString: true
+        // });
+          this.saveErrorMessage = res.data.error
+        }
+       
+      }).catch(err => {
+        console.log(err)
+      })
+    },
     handleClick(){
       if(this.buttonText === "开始"){
         this.buttonText = "结束";
@@ -167,31 +300,76 @@ export default {
     beginRoute(formName) {
 
       // 开始验证
+      var self = this;
       this.$refs[formName].validate((valid) => {
          if(!valid) return false;
          // 验证通过   开始路线规划
-          var self = this;
+        
           console.log(self.routeFrom, self.routeTo);
-          AMap.plugin(`AMap[${this.ruleForm.trafficType}]`, function() {
-            // 设置驾车路线规划策略
-
-            var driving = new AMap[this.ruleForm.trafficType]({
-              // 驾车路线规划策略，AMap.DrivingPolicy.LEAST_TIME是最快捷模式
-              policy: AMap.DrivingPolicy.LEAST_TIME
-            });
-            driving.search(
-              self.routeCoordinate.routeFrom,
-              self.routeCoordinate.routeTo,
-              function(status, result) {
-                // 未出错时，result即是对应的路线规划方案
-                console.log(status, result);
+         
+          // 设置驾车路线规划策略
+          let tempOption = {
+            map: self.map,
+            autoFitView: true,
+            panel: 'panel'
+          }
+          self.ruleForm.trafficType !== 'Walking' && (tempOption.policy = AMap[self.ruleForm.trafficType+'Policy'][self.ruleForm.selectedPolicy])
+          self.ruleForm.trafficType === 'Transfer' && (tempOption.city = self.city)
+          let trafficType = new AMap[self.ruleForm.trafficType](tempOption);
+          trafficType.search(
+            self.routeCoordinate.routeFrom,
+            self.routeCoordinate.routeTo,
+            function(status, result) {
+              // 未出错时，result即是对应的路线规划方案
+              console.log(status, result);
+              if(status === 'error' || status === 'no_data'){
+                 self.$message({
+                  showClose: true,
+                  message: '查不到信息，请修改起始路线',
+                  type: 'error'
+                });
+              }else{
+               self.showPanel = true
+               if(self.ruleForm.trafficType === 'Transfer'){
+                 // 无ruote you plan;
+                  self.$nextTick(() => {
+                    self.onSelectTranfer(result)
+                  })
+                  
+               }else{
+                 self.trafficTime = result.routes[0].time;
+                 self.trafficDistance = result.routes[0].distance;
+               }
+                
               }
-            );
-          });
+            }
+          );
+          
+          
       });
 
 
       
+    },
+    onSelectTranfer(route){
+      var self = this;
+      let planTitles = document.querySelectorAll(".planTitle");
+      let len = planTitles.length;
+      const callback = (cur) => {
+        // console.log(this)
+        let  index = cur.currentTarget.getAttribute("index")
+        let  selectedPlans = route.plans[index];
+        self.spend = selectedPlans.cost;
+        self.trafficTime = selectedPlans.time;
+        self.trafficDistance = selectedPlans.transit_distance + selectedPlans.walking_distance
+      }
+      if(len){
+        for(let i = 0; i<len;i++){
+          let cur = planTitles[i];
+          cur.removeEventListener("click", callback);
+          cur.addEventListener("click", callback)
+        }
+      }
     },
     async init() {
       var self = this;
@@ -226,8 +404,7 @@ export default {
         let autoComplete = new AMap.Autocomplete(autoOptions);
         //监听选中事件
         AMap.event.addListener(autoComplete, "select", function(res) {
-          debugger;
-          self[key] = res.poi.name;
+          self.ruleForm[key] = res.poi.name;
           // 保存经纬度
           self.routeCoordinate[key] = [res.poi.location.Q, res.poi.location.P];
         });
@@ -338,7 +515,6 @@ export default {
       }
     };
 
-   
   }
 };
 </script>
@@ -380,6 +556,45 @@ export default {
     button{
       display: inline-block;
       width: 100%;
+    }
+  };
+  #panelWrapper{
+    position: absolute;
+    bottom: 0;
+    height: 50%;
+    overflow-y: scroll;
+    width: 100%;
+    background-color: white;
+    z-index: 1;
+    // padding-bottom:30px;
+    
+  };
+  .confirm{
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
+    z-index: 1;
+  };
+  .collapse{
+      // position: absolute;
+      // top: 10px;
+      // left: 2px;
+      // width: 100%;
+      margin-bottom: 11px;
+      span{
+        position:absolute;
+        left: 2px;
+      };
+      button{
+        position:absolute;
+        right: 0;
+      };
+    }
+  .saveConfirmDialog{
+    .el-dialog__body div{
+      margin-bottom: 10px
     }
   }
 }
