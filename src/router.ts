@@ -7,7 +7,10 @@ import TripMap from './views/tripMap.vue'
 
 
 import Traffic from './views/traffic.vue'
+
 import History from './views/history.vue'
+import historyDetail from './views/historyDetail.vue'
+
 import Myinfo from './views/myinfo.vue'
 
 Vue.use(Router)
@@ -49,7 +52,15 @@ Vue.use(Router)
     {
       path: '/history',
       name: History.name,
-      component: History
+      component: History,
+      children: [
+        {
+          path: 'detail',
+          name: historyDetail.name,
+          component: historyDetail,
+          props: true
+        }
+      ]
     },
     {
       path: '/myinfo',

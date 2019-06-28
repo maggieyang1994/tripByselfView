@@ -73,14 +73,16 @@ export default {
       set: function(value){
         this.$store.commit("setMapColor", value);
         localStorage.setItem("mapColor", this.mapColor);
-        this.$emit("changeMapColor", value)
+        // 此处$parent 是map
+        this.$parent.$emit("handleColorChange", value)
+  
         this.colorVisible = false;
       }
     }
   },
   methods: {
     handerClick(){
-     this.$parent.getPosition();
+      this.$parent.$emit("getPosition")
     }
   },
   props: {

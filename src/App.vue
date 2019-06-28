@@ -72,6 +72,9 @@ export default {
 html, body{
   height: 100%
 }
+ul li{
+  list-style:none
+};
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -95,15 +98,18 @@ body,div,p{
   padding: 0
 }
 .btmNav{
-  position:absolute;
-  bottom: -18px;
+  position:fixed;
+  bottom: 1px;
   width: 100%;
   background-color: white;
   z-index: 0;
   div.lableP{
-    height: 20px
-  }
-}
+    height: 20px;
+  };
+  .el-tabs__header{
+    margin: 0
+  };
+};
 #tab-trip{
   height:56px
 }

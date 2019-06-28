@@ -14,7 +14,7 @@
    </div>
 
    <!-- 头部工具栏 -->
-   <y-mapPanel :address ="address" :district="district" @changeMapColor="handleColorChange"  v-if="!showRoute"/>
+  <slot name="headerPanel" :address ="address" :district="district" :handleColorChange="handleColorChange"></slot>
 
   <div class="route"  v-if="showRoute" @click="clickOutSide">
     <el-form :model="ruleForm" :rules="rules" labelWidth="0" ref="ruleForm" label-width="100px" class="demo-ruleForm">
@@ -50,16 +50,15 @@
           </el-option>
         </el-select>
       </el-form-item>
-     </div>
+     </div>  
    
       <el-button type="primary" @click="beginRoute('ruleForm')"><span>搜索</span></el-button>
     </el-form>
   </div>
 
 <!-- 底部开始按钮 -->
-  <div class="beginTripSelf" v-if="!showRoute">
-     <el-button  type="primary" @click="handleClick">{{buttonText}}</el-button>
-  </div>
+   <slot name="bottom" :buttonText="buttonText"></slot>
+  
 
   <!-- 位置跟踪遮罩层 -->
   <transition name="slide"> 
@@ -88,7 +87,7 @@
         width="87%">
         <div style="display:flex;justify-content: space-between">
           <span>交通方式</span>
-          <span>{{ruleForm.trafficType}}</span>
+          <span>{{tripTypeMap.find(x => x.value === ruleForm.trafficType).label}}</span>
         </div>
         <div style="display:flex;justify-content: space-between">
           <span>出发地</span>
@@ -100,7 +99,7 @@
         </div>
         <div style="display:flex;justify-content: space-between">
           <span>花费</span>
-          <el-input-number v-model="spend"  :min="1"></el-input-number>
+          <el-input-number v-model="spend"  :min="0"></el-input-number>
         </div>
         <div style="display:flex;justify-content: space-between">
           <span>日期</span>
@@ -138,7 +137,7 @@
 <script>
 import { mapState } from "vuex";
 import TripStart from "./tripStart.vue";
-import MapPanel from "./mapPanel.vue";
+
 import dayjs from 'dayjs';
 import axios from 'axios';
 // const policyMap = {
@@ -147,8 +146,7 @@ import axios from 'axios';
 export default {
   name: "y-map",
   components: {
-    "y-tripStart": TripStart,
-    "y-mapPanel": MapPanel
+    "y-tripStart": TripStart
   },
   props: {
     tripType: {
@@ -263,6 +261,8 @@ export default {
           this.showPanel = false;
           this.ruleForm.routeTo = '';
           this.ruleForm.routeFrom = '';
+          this.spend = 0;
+          this.remarks = '';
           this.$refs['ruleForm'].resetFields();
           this.dialogVisible = false
         } else {
@@ -415,7 +415,7 @@ export default {
       var self = this;
       this.positioning = true;
       return new Promise((resolve, reject) => {
-        this.map.plugin("AMap.Geolocation", function() {
+        self.map.plugin("AMap.Geolocation", function() {
           var geolocation = new AMap.Geolocation({
             // 是否使用高精度定位，默认：true
             enableHighAccuracy: true,
@@ -515,6 +515,11 @@ export default {
       }
     };
 
+
+    // 监听来自mapPanel的事件
+    this.$on('handleColorChange', this.handleColorChange);
+    this.$on('getPosition', this.getPosition)
+    this.$on('handerButtonClick', this.handleClick)
   }
 };
 </script>
@@ -524,7 +529,7 @@ export default {
   height: 100%;
   #map {
     height: 100%;
-    z-index: 1;
+    z-index: 0;
   }
   
   .route {
@@ -548,7 +553,7 @@ export default {
   };
   .beginTripSelf{
     position: fixed;
-    bottom: 40px;
+    bottom: 80px;
     width: 40%;
     left: 50%;
     transform: translate(-50%);
