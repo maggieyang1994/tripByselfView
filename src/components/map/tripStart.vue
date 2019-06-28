@@ -7,7 +7,7 @@
         <p>总计时间</p>
       </div>
       <div>
-        <p>{{speed}} 344343.3</p>
+        <p>{{speed}}</p>
         <p>平均配速(km/h)</p>
       </div>
       <div>

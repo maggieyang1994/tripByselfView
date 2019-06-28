@@ -16,47 +16,13 @@
    <!-- 头部工具栏 -->
   <slot name="headerPanel" :address ="address" :district="district" :handleColorChange="handleColorChange"></slot>
 
-  <div class="route"  v-if="showRoute" @click="clickOutSide">
-    <el-form :model="ruleForm" :rules="rules" labelWidth="0" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-     <div style="display:flex">
-      <el-form-item  prop="routeFrom" style="flex: 1">
-        <el-input v-model="ruleForm.routeFrom" placeholder="起  请输入起点" id="routeFrom" ></el-input>
-      </el-form-item>
 
-   <el-form-item  prop="trafficType" style="width: 30%">
-       <el-select v-model="ruleForm.trafficType" placeholder="请选择出行方式" >
-          <el-option
-            v-for="item in tripTypeMap"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-    </el-form-item>
-     </div>
-<!-- reverse按钮 -->
-     <i class="el-icon-sort reverseButton" @click="reverseRoute"></i>
+  <!--  路线规划 -->
+   <y-routeConfig :map="map" :city="city" v-if="loadRoute && showRoute"></y-routeConfig>
 
 
-    <div style="display:flex">
-       <el-form-item  prop="routeTo" style="flex: 1"> <el-input v-model="ruleForm.routeTo" placeholder="终  请输入终点" id="routeTo"> </el-input></el-form-item>
-       <el-form-item  prop="selectedPolicy" style="width: 30%">
-         <el-select v-model="ruleForm.selectedPolicy" placeholder="请选择规划策略"  :disabled="ruleForm.trafficType === 'Walking'">
-          <el-option
-            v-for="item in currentPolicyOption"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-      </el-form-item>
-     </div>  
-   
-      <el-button type="primary" @click="beginRoute('ruleForm')"><span>搜索</span></el-button>
-    </el-form>
-  </div>
 
-<!-- 底部开始按钮 -->
+  <!-- 底部开始按钮 -->
    <slot name="bottom" :buttonText="buttonText"></slot>
   
 
@@ -65,88 +31,18 @@
      <y-tripStart v-if="showTripStart" ref="tripStart" :map="map" :tripType="tripType"/>
   </transition>
 
-  <!-- 路线规划结果 -->
-  <div   id="panelWrapper" :style="{height: isPanelCollapse ? '50%': '4%'}" v-show="showPanel">
-    <div  class="collapse">
-      <span>请选择合适路线</span>
-      <span></span>
-      <svg-icon :iconClass="isPanelCollapse? 'ico-two-down-arrow': 'ico-two-up-arrow'" @click="isPanelCollapse=!isPanelCollapse"></svg-icon>
-      <el-button @click="confirm" type ="primary" size="mini">确定</el-button>
-    </div>
-    <div>
-      <div id ="panel"></div>
-    </div>
-  </div>
 
-
-  <!-- 确认dialog -->
- <div  class="saveConfirmDialog">
-     <el-dialog
-        title="本次出行"
-        :visible.sync="dialogVisible"
-        width="87%">
-        <div style="display:flex;justify-content: space-between">
-          <span>交通方式</span>
-          <span>{{tripTypeMap.find(x => x.value === ruleForm.trafficType).label}}</span>
-        </div>
-        <div style="display:flex;justify-content: space-between">
-          <span>出发地</span>
-          <span>{{ruleForm.routeFrom}}</span>
-        </div>
-        <div style="display:flex;justify-content: space-between">
-          <span>目的地</span>
-          <span>{{ruleForm.routeTo}}</span>
-        </div>
-        <div style="display:flex;justify-content: space-between">
-          <span>花费</span>
-          <el-input-number v-model="spend"  :min="0"></el-input-number>
-        </div>
-        <div style="display:flex;justify-content: space-between">
-          <span>日期</span>
-          <span>{{curDate}}</span>
-        </div>
-        <div style="display:flex;justify-content: space-between">
-          <span style="width: 12%">备注</span>
-          <el-input v-model="remarks"></el-input>
-        </div>
-
-        <!--  嵌套dialog -->
-        <el-dialog
-          title="保存失败"
-          :visible="!!saveErrorMessage"
-          append-to-body
-          width="85%"
-          >
-          <span>{{saveErrorMessage}}</span>
-          <span slot="footer" class="dialog-footer">
-          
-            <el-button type="primary" @click="saveErrorMessage=''">确 定</el-button>
-          </span>
-        </el-dialog>
-
-        <span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="confirmSave">确认保存</el-button>
-        </span>
-      </el-dialog>
- </div>
- 
  </div>
   
 </template>
 <script>
-import { mapState } from "vuex";
-import TripStart from "./tripStart.vue";
-
-import dayjs from 'dayjs';
-import axios from 'axios';
-// const policyMap = {
-//   'Walking':
-// }
+import routeConfig from "./map/routeConfig.vue";
+import TripStart from "./map/tripStart.vue";
 export default {
   name: "y-map",
   components: {
-    "y-tripStart": TripStart
+    "y-tripStart": TripStart,
+    "y-routeConfig": routeConfig
   },
   props: {
     tripType: {
@@ -159,9 +55,7 @@ export default {
   },
   
   data() {
-    const tripTypeMap = JSON.parse('[{"value":"Walking","label":"步行"},{"value":"Transfer","label":"公交/地铁"},{"value":"Riding","label":"骑行"},{"value":"Driving","label":"自驾"}]');
-    
-    return {
+   return {
       // mapColor: this.mapColor,
       map: null,
       address: "",
@@ -169,113 +63,15 @@ export default {
       buttonText: "开始",
       positioning: false,
       loading: true,
-      routeCoordinate: {},
+      loadRoute: false,
+ 
       marker: null,
       longitude: "",
       latitude: "",
-      showTripStart: false,
-      tripTypeMap,
-      policyMap: {},
-      currentPolicyOption: [],
-      showPanel: false,
-      remarks:'',
-      spend: 0,
-      dialogVisible: false,
-      saveErrorMessage:"",
-      curDate: '',
-      trafficDistance: '',
-      isPanelCollapse: true,
-      trafficTime: "",
-      ruleForm: {
-        routeFrom: '',
-        routeTo: '',
-        trafficType: 'Walking',
-        selectedPolicy: ''
-      },
-      rules: {
-        routeFrom: [
-          {required: true, message: "请输入起点", trigger: "change"}
-        ],
-        routeTo: [
-          {required: true, message: "请输入终点", trigger: "change"}
-        ],
-        selectedPolicy: [
-          {required: true, message: "请选择出行策略", trigger: "change"}
-        ]
-      }
+      showTripStart: false
     };
   },
-  // computed: {
-    
-  // },
-  watch: {
-   'ruleForm.trafficType': {
-     handler: function(newV){
-       this.ruleForm.selectedPolicy = newV ===  'Walking' ? 'Default': '';
-       this.policyMap[newV] && this.policyMap[newV].length && (this.currentPolicyOption = this.policyMap[newV]);
-      //  this.computeRules = newV === 'Walking' ? {routeFrom: this.rules.routeFrom,routeTo: this.rules.routeTo}: this.rules;
-      //  console.log(this.computeRules)
-     }, 
-     // 代表在wacth里声明了这个方法之后立即先去执行handler方法
-    immediate: true
-   }
-  },
   methods: {
-    clickOutSide(e){
-      document.querySelector("#panel") && (document.querySelector("#panel").innerHTML = '')
-      // this.showPanel && (this.showPanel = false)
-    },
-    confirm(){
-      // 存到数据库
-      // 清空输入框
-     
-      this.curDate = dayjs().format("YYYY-MM-DD hh:ss")
-      this.dialogVisible = true
-    },
-    confirmSave(){
-      // 保存到数据库
-      let params = {
-        userId: this.$store.state.userInfo[0].userId,
-        type: 'traffic',
-        tripType: this.ruleForm.trafficType,
-        distance: this.trafficDistance,
-        time: this.trafficTime,
-        date: this.curDate,
-        Calorie: this.Calories,
-        price: this.spend,
-        startPlace: this.routeFrom,
-        endPlace: this.routeTo,
-        startCode: this.routeCoordinate.routeFrom,
-        endCode: this.routeCoordinate.routeTo,
-        mark: this.remarks
-
-      };
-      axios.post("http://localhost:4000/trip/saveTrip", params).then(res => {
-        console.log(res);
-        if(res.data.code){
-           this.$message({
-            showClose: true,
-            message:'保存成功,此次记录已经上传',
-            type:  'success'
-          })
-          this.showPanel = false;
-          this.ruleForm.routeTo = '';
-          this.ruleForm.routeFrom = '';
-          this.spend = 0;
-          this.remarks = '';
-          this.$refs['ruleForm'].resetFields();
-          this.dialogVisible = false
-        } else {
-        //   this.$alert(`<span style="color:red">${res.data.error}</span>`, '保存失败', {
-        //   dangerouslyUseHTMLString: true
-        // });
-          this.saveErrorMessage = res.data.error
-        }
-       
-      }).catch(err => {
-        console.log(err)
-      })
-    },
     handleClick(){
       if(this.buttonText === "开始"){
         this.buttonText = "结束";
@@ -290,86 +86,6 @@ export default {
     },
     handleColorChange(value){
       this.map.setMapStyle(`amap://styles/${value}`);
-    },
-    reverseRoute() {
-      [this.routeFrom, this.routeTo] = [this.routeTo, this.routeFrom];
-      let temp = JSON.parse(JSON.stringify(this.routeCoordinate));
-      this.routeCoordinate.routeFrom = temp.routeTo;
-      this.routeCoordinate.routeTo = temp.routeFrom;
-    },
-    beginRoute(formName) {
-
-      // 开始验证
-      var self = this;
-      this.$refs[formName].validate((valid) => {
-         if(!valid) return false;
-         // 验证通过   开始路线规划
-        
-          console.log(self.routeFrom, self.routeTo);
-         
-          // 设置驾车路线规划策略
-          let tempOption = {
-            map: self.map,
-            autoFitView: true,
-            panel: 'panel'
-          }
-          self.ruleForm.trafficType !== 'Walking' && (tempOption.policy = AMap[self.ruleForm.trafficType+'Policy'][self.ruleForm.selectedPolicy])
-          self.ruleForm.trafficType === 'Transfer' && (tempOption.city = self.city)
-          let trafficType = new AMap[self.ruleForm.trafficType](tempOption);
-          trafficType.search(
-            self.routeCoordinate.routeFrom,
-            self.routeCoordinate.routeTo,
-            function(status, result) {
-              // 未出错时，result即是对应的路线规划方案
-              console.log(status, result);
-              if(status === 'error' || status === 'no_data'){
-                 self.$message({
-                  showClose: true,
-                  message: '查不到信息，请修改起始路线',
-                  type: 'error'
-                });
-              }else{
-               self.showPanel = true
-               if(self.ruleForm.trafficType === 'Transfer'){
-                 // 无ruote you plan;
-                  self.$nextTick(() => {
-                    self.onSelectTranfer(result)
-                  })
-                  
-               }else{
-                 self.trafficTime = result.routes[0].time;
-                 self.trafficDistance = result.routes[0].distance;
-               }
-                
-              }
-            }
-          );
-          
-          
-      });
-
-
-      
-    },
-    onSelectTranfer(route){
-      var self = this;
-      let planTitles = document.querySelectorAll(".planTitle");
-      let len = planTitles.length;
-      const callback = (cur) => {
-        // console.log(this)
-        let  index = cur.currentTarget.getAttribute("index")
-        let  selectedPlans = route.plans[index];
-        self.spend = selectedPlans.cost;
-        self.trafficTime = selectedPlans.time;
-        self.trafficDistance = selectedPlans.transit_distance + selectedPlans.walking_distance
-      }
-      if(len){
-        for(let i = 0; i<len;i++){
-          let cur = planTitles[i];
-          cur.removeEventListener("click", callback);
-          cur.addEventListener("click", callback)
-        }
-      }
     },
     async init() {
       var self = this;
@@ -388,27 +104,7 @@ export default {
       // 初始定位
       await this.getPosition();
 
-      // 添加输入提示
-      if(this.showRoute) {
-        self.placeSearch("routeFrom");
-        self.placeSearch("routeTo");
-      }
-    },
-    placeSearch(key) {
-      var self = this;
-      this.map.plugin("AMap.Autocomplete", function() {
-        let autoOptions = {
-          city: self.city,
-          input: key
-        };
-        let autoComplete = new AMap.Autocomplete(autoOptions);
-        //监听选中事件
-        AMap.event.addListener(autoComplete, "select", function(res) {
-          self.ruleForm[key] = res.poi.name;
-          // 保存经纬度
-          self.routeCoordinate[key] = [res.poi.location.Q, res.poi.location.P];
-        });
-      });
+      
     },
     async getPosition() {
       // 异步加载 插件geolocation 加载成功执行回掉
@@ -474,16 +170,10 @@ export default {
 
       // 将创建的点标记添加到已有的地图实例：
       this.map.add(this.marker);
-    },
-   async getDrivingPlugin(trafficType){
-     return new Promise((resolve, reject) => {
-       this.map.plugin(`AMap.${trafficType}`, function(){
-         resolve();
-       })
-     })
-   }
+    }
   },
-  mounted() {
+  created() {
+    // 在组件挂载之前   加载js
     // 动态加载js
     let self = this;
     let aMapScript = document.createElement("script");
@@ -495,24 +185,7 @@ export default {
     aMapScript.onload = async function() {
       await self.init();
       self.loading = false;
-      if(self.showRoute){
-         // 初始化 规划插件
-        let tempMap = self.tripTypeMap.map(x => self.getDrivingPlugin(x.value));
-        Promise.all(tempMap).then(res => {
-          self.policyMap = self.tripTypeMap.map(x => x.value).filter(x => x !=='Walking').reduce((o, item) => {
-              let temp =  AMap[item + 'Policy'];
-              let arr = []
-              for(let  key in temp){
-                arr.push({
-                  value: key,
-                  label: key
-                })
-              }
-              o[item] = arr;
-              return o
-          }, {})
-        })
-      }
+      self.loadRoute = true
     };
 
 
@@ -531,26 +204,6 @@ export default {
     height: 100%;
     z-index: 0;
   }
-  
-  .route {
-    position: fixed;
-    top: 0px;
-    z-index: 2;
-    width: 100%;
-    padding-bottom:20px;
-    background-color:white;
-    // left: 50%;
-    // transform: translate(-50%);
-    
-    // .trafficType .el-input__suffix{
-    //   width: 30%
-    // }
-    .reverseButton{
-      display:block;
-      margin-top:-16px;
-    }
-    
-  };
   .beginTripSelf{
     position: fixed;
     bottom: 80px;
@@ -563,45 +216,7 @@ export default {
       width: 100%;
     }
   };
-  #panelWrapper{
-    position: absolute;
-    bottom: 0;
-    height: 50%;
-    overflow-y: scroll;
-    width: 100%;
-    background-color: white;
-    z-index: 1;
-    // padding-bottom:30px;
-    
-  };
-  .confirm{
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-    transform: translateX(-50%);
-    z-index: 1;
-  };
-  .collapse{
-      // position: absolute;
-      // top: 10px;
-      // left: 2px;
-      // width: 100%;
-      margin-bottom: 11px;
-      span{
-        position:absolute;
-        left: 2px;
-      };
-      button{
-        position:absolute;
-        right: 0;
-      };
-    }
-  .saveConfirmDialog{
-    .el-dialog__body div{
-      margin-bottom: 10px
-    }
-  }
+ 
 }
 
 // 动画

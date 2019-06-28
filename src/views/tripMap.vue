@@ -9,13 +9,13 @@
 
           <!-- 底部开始 -->
           <template v-slot:bottom="slotProps">
-              <el-button  type="primary" @click="demo" class="beginTripSelf">{{slotProps.buttonText}}</el-button>
+              <el-button  type="primary" class="beginTripSelf" @click="$refs.map.$emit('handerButtonClick')">{{slotProps.buttonText}}</el-button>
           </template>
         </y-map>
      </div>
 </template>
 <script>
-import MapPanel from "../components/mapPanel.vue";
+import MapPanel from "../components/map/mapPanel.vue";
 export default {
   name: "tripMap",
   components: {
@@ -30,14 +30,11 @@ export default {
   methods: {
     handlerBackToTrip(distance){
       this.$router.push({name: "trip",  params: {distance, showMap: false}})
-    },
-    demo(){
-      this.$refs.map.$emit("handerButtonClick")
     }
   }
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
   .tripMap{
      .beginTripSelf{
         position: fixed;

@@ -1,6 +1,6 @@
 <template>
    <div class="historyWrapper">
-     <!-- <div class="history" v-if="!isShowDetail">
+     <div class="history" v-if="!isShowDetail">
        <div class="title"><h3>出行历史</h3></div>
         <ul class="list">
           <li v-for="item in list" v-bind:key="item.id">
@@ -14,19 +14,16 @@
      </div>
      <div class="historyDetail" v-else>
        <router-view/>
-     </div> -->
-         <y-mapPanel  address="address"  district="district"/>
+     </div>
+         
   </div> 
 </template>
 <script>
-import MapPanel from "../components/mapPanel.vue";
+
 import dayjs from 'dayjs';
 import axios from 'axios';
 export default {
   name:'history',
-   components: {
-    "y-mapPanel": MapPanel
-  },
   data(){
     return {
       list: [],
@@ -58,7 +55,9 @@ export default {
 <style lang="scss" scoped>
   .historyWrapper{
    height: 100%;
-  .title{
+   .history{
+     height:100%;
+     .title{
     text-align: left;
     // position:fixed;
     top:0;
@@ -88,6 +87,8 @@ export default {
      };
      
     };
+   };
+  
     .historyDetail{
       height: 100%;
     }
