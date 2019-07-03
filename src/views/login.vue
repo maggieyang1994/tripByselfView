@@ -30,8 +30,8 @@ export default {
   data() {
     return {
       userName: '',
-      password: localStorage.getItem("password") ? JSON.parse(localStorage.getItem("password")) : '',
-      rememberPassword: false
+      password: '',
+      rememberPassword: true
     };
   },
   methods: {
@@ -45,15 +45,21 @@ export default {
         if(res.data.code === 400){
           this.$message.error(res.data.msg)
         }else{
-          
-          this.$store.commit("setUserInfo", res.data.msg);
-          localStorage.setItem("userInfo", JSON.stringify(res.data.msg));
-          this.checked && localStorage.setItem("password", JSON.stringify(this.password));
+          let tempObj = res.data.msg[0]
+          this.rememberPassword && (tempObj.password = this.password);
+          this.$store.commit("setUserInfo", tempObj);
+          localStorage.setItem("userInfo", JSON.stringify(tempObj));
+          // this.rememberPassword && localStorage.setItem("password", JSON.stringify(this.password));
           this.$router.push({name: 'trip'})
         }
       }).catch(e => {
         console.log(e)
       })
+    }
+  },
+  watch: {
+    userName(newV){
+      if(this.rememberPassword) this.password = this.$store.state.userInfo.userName === newV ? this.$store.state.userInfo.password : ''
     }
   }
 };

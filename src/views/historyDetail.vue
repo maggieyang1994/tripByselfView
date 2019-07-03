@@ -48,10 +48,7 @@ export default {
       require: true
     }
   },
-  mounted () {
-    console.log(this.detail)
-  },
-  methods: {
+ methods: {
    
   }
 }
@@ -68,7 +65,8 @@ export default {
       position: absolute;
       top: 0;
       opacity: 0.9;
-      .remarks{
+      .remark{
+
         margin-top:20px;
         text-align:left
       }

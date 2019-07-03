@@ -6,59 +6,51 @@
     </div> -->
     
     <router-view/>
-    <div class="btmNav">
+     <div class="btmNav">
       <el-tabs v-model="activeName" @tab-click="handleClick" :stretch="true">
-        <el-tab-pane  :name="item.name" v-for="item in routerList" :key="item.text">
+        <el-tab-pane  :name="item.name" v-for="item in routes" :key="item.name">
           <div slot="label">
-            <!-- <div class="lableP"><svg-icon :iconClass="item.icon" :iconColor = "item.name===activeName? '#409EFF': 'black'"></svg-icon></div> -->
-             <span slot="label"><svg-icon :iconClass="item.icon" :iconColor = "item.name===activeName? '#409EFF': 'black'"></svg-icon>{{item.text}}</span>
-            <!-- <div class="lableP" :style="{color: item.name===activeName? '#409EFF': 'black'}">{{item.text}}</div> -->
+           <span slot="label" v-if="item.meta"><svg-icon :iconClass="item.meta.icon" :iconColor = "item.name===activeName? '#409EFF': 'black'"></svg-icon>{{item.meta.text}}</span>
           </div>
-        
         </el-tab-pane>
       </el-tabs>
-    </div>
-    
-
+    </div> 
+    <!-- <div style="display:flex;">
+        <div style="width: 200px">
+          <y-nav :routes="routes"></y-nav>
+        </div>
+        <div style="flex:1">
+          <router-view/>
+        </div>
+    </div> -->
+  
   </div>
 </template>
 <script>
-
+// import Nav from "./components/Nav/btmNav.vue"
 export default {
   data(){
     return {
-      routerList: [
-      {
-        text: '出行',
-        name: 'trip',
-        icon: 'home',
-      },{
-        text: '交通',
-        name: 'traffic',
-        icon: 'location'
-      },{
-        text: '历史',
-        name: 'history',
-        icon: 'historychoose'
-      },{
-        text: '我的',
-        name: 'myinfo',
-        icon: 'people'
-      }
-    ],
-    activeName:'trip'
+      activeName:'trip'
     }
   },
+  // components: {
+  //   'y-nav':Nav
+  // },
   methods: {
     handleClick(tab){
       this.$router.push({name: tab.name});
       this.activeName = tab.name;
-
+    }
+  },
+  computed: {
+    routes(){
+      return this.$store.state.routes.filter(x => x.meta)
     }
   },
   mounted(){
     let href = location.href.split("/");
-    if(href.length) this.activeName = href[href.length - 1]
+    if(href.length) this.activeName = href[href.length - 1];
   },
   watch: {
     $route(to, from){

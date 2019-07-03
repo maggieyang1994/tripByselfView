@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import App from './App.vue'
-import router from './router'
+//  这里 store里面引入了router  所以  store一定要先引入
 import store from './store'
+import router from './router'
+
 import element from 'element-ui';
 import plugins from './components/index.js';
 import 'element-ui/lib/theme-chalk/index.css';

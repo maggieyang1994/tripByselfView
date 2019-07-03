@@ -21,26 +21,26 @@
 <script>
 
 import dayjs from 'dayjs';
-import axios from 'axios';
+
 export default {
   name:'history',
   data(){
     return {
-      list: [],
-      isShowDetail: false
+     isShowDetail: false
     }
   },
-  mounted(){
-    this.getData()
+  computed: {
+    list(){
+      return this.$store.state.totalTrips
+    }
+  },
+  watch: {
+    list(newv){
+      console.log(newv)
+    }
   },
   methods: {
-    getData(){
-      axios.get("http://localhost:4000/trip/getTotalTrips").then(res => {
-        console.log(res);
-        this.list = res.data
-      })
-    },
-    showDetail(item){
+   showDetail(item){
       this.isShowDetail = true
       this.$router.push({
         name: "historyDetail",
@@ -49,6 +49,9 @@ export default {
         }
       })
     }
+  },
+  mounted(){
+   this.$store.dispatch("setTrips")
   }
 }
 </script>

@@ -1,11 +1,13 @@
 import Map from './map.vue';
 import Dialog from './dialog.vue'
 import SvgIcon from './SvgIcons.vue'
+import Echart from './Echart.vue'
 
 const components =[
   Map,
   Dialog,
-  SvgIcon
+  SvgIcon,
+  Echart
 ];
 
 const plugins = {

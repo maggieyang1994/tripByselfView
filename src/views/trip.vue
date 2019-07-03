@@ -7,8 +7,8 @@
           <!-- {{item.distance}} -->
           <div class="tripCenter">
             <p>累计{{item.tripType}}</p>
-            <h1>{{item.distance}}</h1>
-            <p>本月累计{{item.tripType}}{{item.distance}}公里</p>
+            <h1>{{Number(item.distance).toFixed(2)}}</h1>
+            <p>本月累计{{item.tripType}}{{Number(item.distance).toFixed(2)}}公里</p>
           </div>
           <div class="beginTrip">
             <el-button type="primary" @click="beginTrip()">开始{{item.tripType.substring(0,2)}}</el-button>
@@ -43,6 +43,11 @@ export default {
         if(showMap === false) this.showMap = false
       },
       deep: true
+    },
+    $route(to, from){
+      // this.activeName = to.name;
+      console.log(to, from);
+      if(to.name==='trip') this.showMap = false
     }
   },
   methods: {

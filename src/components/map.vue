@@ -28,7 +28,7 @@
 
   <!-- 位置跟踪遮罩层 -->
   <transition name="slide"> 
-     <y-tripStart v-if="showTripStart" ref="tripStart" :map="map" :tripType="tripType"/>
+     <y-tripStart v-if="showTripStart" ref="tripStart" :map="map" :tripType="tripType" @drawPolyline="drawPolyline"/>
   </transition>
 
 
@@ -170,7 +170,26 @@ export default {
 
       // 将创建的点标记添加到已有的地图实例：
       this.map.add(this.marker);
-    }
+    },
+    drawPolyline(path) {
+      var self = this;
+      // 先删除之前的折线
+      this.map.plugin("AMap.PolyEditor", function () {
+        self.polyline && self.map.remove(self.polyline);
+        // 创建折线实例
+        self.polyline = new AMap.Polyline({
+          path,
+          strokeWeight: 10, // 线条宽度s
+          strokeColor: '#fff', // 线条颜色
+          isOutline: true,	// 是否描边
+          outlineColor: 'red', // 描边颜色
+          borderWeight: 5, // 描边宽度
+          lineJoin: 'round' // 折线拐点连接处样式
+        });
+        // 将折线添加至地图实例
+        self.map.add(self.polyline);
+      })
+    },
   },
   created() {
     // 在组件挂载之前   加载js

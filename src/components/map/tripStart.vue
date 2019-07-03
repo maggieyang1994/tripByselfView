@@ -137,7 +137,7 @@ export default {
       that.drawMarker(tempMarker.Q, tempMarker.P);
 
       // // 画路线图
-      this.drawPolyline();
+      this.$emit("drawPolyline", this.path)
 
       // 存到数据库
       let params = {
@@ -170,26 +170,6 @@ export default {
        
       }).catch(err => {
         console.log(err)
-      })
-
-    },
-    drawPolyline() {
-      var self = this;
-      // 先删除之前的折线
-      AMap.plugin("AMap.PolyEditor", function () {
-        self.polyline && self.map.remove(self.polyline);
-        // 创建折线实例
-        self.polyline = new AMap.Polyline({
-          path: self.path,
-          strokeWeight: 10, // 线条宽度
-          strokeColor: '#fff', // 线条颜色
-          isOutline: true,	// 是否描边
-          outlineColor: 'red', // 描边颜色
-          borderWeight: 5, // 描边宽度
-          lineJoin: 'round' // 折线拐点连接处样式
-        });
-        // 将折线添加至地图实例
-        self.map.add(self.polyline);
       })
 
     },
