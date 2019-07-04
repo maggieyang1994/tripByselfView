@@ -271,7 +271,7 @@ export default {
     confirmSave(){
       // 保存到数据库
       let params = {
-        userId: this.$store.state.userInfo[0].userId,
+        userId: this.$store.state.userInfo.userId,
         type: 'traffic',
         tripType: this.ruleForm.trafficType,
         distance: this.trafficDistance,
