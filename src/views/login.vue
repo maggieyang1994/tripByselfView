@@ -36,7 +36,7 @@ export default {
   },
   methods: {
     login(){
-      axios.get("http://localhost:4000/user/getUserDetail", {
+      axios.get("/user/getUserDetail", {
         params: {
           userName: this.userName,
           password: this.password

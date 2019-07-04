@@ -57,7 +57,7 @@ export default {
     },
   },
   mounted(){
-    axios.get("http://localhost:4000/trip/getTrips").then(res => {
+    axios.get("/trip/getTrips").then(res => {
       this.tripData = res.data
     })
   }

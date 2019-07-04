@@ -29,7 +29,7 @@ export default new Vuex.Store({
   },
   actions: {
     setTrips({commit}){
-      axios.get("http://localhost:4000/trip/getTotalTrips").then(res => {
+      axios.get("/trip/getTotalTrips").then(res => {
         commit("setTrips", res.data);
       })
     }
