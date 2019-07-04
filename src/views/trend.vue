@@ -75,7 +75,6 @@ export default {
       let xAxis = this.getXAxis();
       let Legend = this.getLegend(type);
       let series = this.getSeries(list, type, xAxis, Legend);
-      console.log(series)
       return {
         title: {
           text: title

@@ -77,7 +77,6 @@ export default {
   },
   methods: {
     handlerClick(item){
-      console.log(item)
       this.$router.push({name: item.name})
     },
     handerFansClick(item){

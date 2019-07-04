@@ -25,9 +25,10 @@
 // const bottomTripMap = {
 //   icon
 // }
-import axios from 'axios'
+
 export default {
   name: "trip",
+
   data() {
     return {
       activeTab: '徒步出行',
@@ -57,7 +58,7 @@ export default {
     },
   },
   mounted(){
-    axios.get("/trip/getTrips").then(res => {
+    myAxios('/trip/getTrips','get').then(res => {
       this.tripData = res.data
     })
   }

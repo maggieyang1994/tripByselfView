@@ -24,7 +24,7 @@
   </div>
 </template>
 <script>
-import axios from "axios"
+
 export default {
   name: "login",
   data() {
@@ -36,12 +36,13 @@ export default {
   },
   methods: {
     login(){
-      axios.get("/user/getUserDetail", {
-        params: {
-          userName: this.userName,
-          password: this.password
-        }
-      }).then(res => {
+      // axios.get("https://triprecord-server.herokuapp.com/user/getUserDetail", {
+      //   params: {
+      //     userName: this.userName,
+      //     password: this.password
+      //   }
+      // }).then(res => {
+        myAxios("/user/getUserDetail", 'get', {params:{userName: this.userName,password: this.password}}).then(res =>{
         if(res.data.code === 400){
           this.$message.error(res.data.msg)
         }else{

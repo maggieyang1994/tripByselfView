@@ -5,8 +5,13 @@ function resolve(dir) {
 }
 
 module.exports = {
+  // resolve: {
+  //   alias: {
+  //     'mixin': path.resolve(__dirname, "src/plugin")
+  //   }
+  // },
   publicPath: process.env.NODE_ENV === 'production' ? '/tripByselfView/' : '/',
-  chainWebpack (config) {
+  chainWebpack(config) {
     // SVG sprite exclude
     config.module
       .rule('svg')
@@ -24,6 +29,11 @@ module.exports = {
       .options({
         symbolId: 'icon-[name]'
       })
-      .end()
+      .end(); (
+
+
+        // 设置别名
+        config.resolve.alias.set("mixin", path.resolve(__dirname, 'src/plugin'))).set("@", path.resolve(__dirname, 'src')).end()
+
   }
 }

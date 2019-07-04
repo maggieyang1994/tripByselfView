@@ -23,7 +23,7 @@
 
 
   <!-- 底部开始按钮 -->
-   <slot name="bottom" :buttonText="buttonText"></slot>
+   <slot name="bottom" :buttonText="buttonText" :positioning='positioning'></slot>
   
 
   <!-- 位置跟踪遮罩层 -->

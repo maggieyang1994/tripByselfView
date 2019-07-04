@@ -11,7 +11,7 @@
         <p>平均配速(km/h)</p>
       </div>
       <div>
-        <p>{{Calories}}  45</p>
+        <p>{{Calories}}</p>
         <p>消耗能量(k)</p>
       </div>
     </div>
@@ -43,7 +43,7 @@
  
 </template>
 <script>
-import axios from "axios";
+
 import dayjs from "dayjs";
 export default {
   name: "tripStart",
@@ -133,44 +133,52 @@ export default {
       this.timer = null;
       this.isQuit = true
       // // 瞄点
-      let tempMarker = this.path[this.path.length - 1]
-      that.drawMarker(tempMarker.Q, tempMarker.P);
+      if(this.path.length){
+        let tempMarker = this.path[this.path.length - 1]
+        that.drawMarker(tempMarker.Q, tempMarker.P);
 
-      // // 画路线图
-      this.$emit("drawPolyline", this.path)
+        // // 画路线图
+        this.$emit("drawPolyline", this.path)
 
-      // 存到数据库
-      let params = {
-        userId: this.$store.state.userInfo[0].userId,
-        type: 'trip',
-        tripType: this.tripType,
-        distance: this.distance,
-        time: this.sec,
-        date: dayjs().format("YYYY-MM-DD"),
-        trajectory: JSON.stringify(this.path),
-        Calorie: this.Calories,
-        speed: this.speed,
-        mark: this.remarks
+        // 存到数据库
+        let params = {
+          userId: this.$store.state.userInfo.userId,
+          type: 'trip',
+          tripType: this.tripType,
+          distance: this.distance,
+          time: this.sec,
+          date: dayjs().format("YYYY-MM-DD"),
+          trajectory: JSON.stringify(this.path),
+          Calorie: this.Calories,
+          speed: this.speed,
+          mark: this.remarks
 
-      };
-      axios.post("/trip/saveTrip", params).then(res => {
-        console.log(res);
-        if(res.data.code){
-           this.$message({
-            showClose: true,
-            message:'保存成功,此次记录已经上传',
-            type:  'success'
-          })
-        } else {
-        //   this.$alert(`<span style="color:red">${res.data.error}</span>`, '保存失败', {
-        //   dangerouslyUseHTMLString: true
-        // });
-          this.errorMessage = res.data.error
-        }
-       
-      }).catch(err => {
-        console.log(err)
-      })
+        };
+        myAxios("/trip/saveTrip", "post", params).then(res => {
+          console.log(res);
+          if(res.data.code){
+            this.$message({
+              showClose: true,
+              message:'保存成功,此次记录已经上传',
+              type:  'success'
+            })
+          } else {
+          //   this.$alert(`<span style="color:red">${res.data.error}</span>`, '保存失败', {
+          //   dangerouslyUseHTMLString: true
+          // });
+            this.errorMessage = res.data.error
+          }
+        
+        }).catch(err => {
+          console.log(err)
+        })
+      }else {
+        this.$message({
+          showClose: true,
+          message: '本次行程距离为零，默认不上传'
+        })
+      }
+      
 
     },
     toGaodeCor(gps) {

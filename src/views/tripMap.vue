@@ -9,7 +9,7 @@
 
           <!-- 底部开始 -->
           <template v-slot:bottom="slotProps">
-              <el-button  type="primary" class="beginTripSelf" @click="$refs.map.$emit('handerButtonClick')">{{slotProps.buttonText}}</el-button>
+              <el-button  type="primary" class="beginTripSelf" @click="$refs.map.$emit('handerButtonClick')" :disabled = 'slotProps.positioning'>{{slotProps.buttonText}}</el-button>
           </template>
         </y-map>
      </div>

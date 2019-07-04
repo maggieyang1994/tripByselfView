@@ -286,7 +286,8 @@ export default {
         mark: this.remarks
 
       };
-      axios.post("/trip/saveTrip", params).then(res => {
+     
+       myAxios("/trip/saveTrip", 'post', params).then(res => {
         console.log(res);
         if(res.data.code){
            this.$message({

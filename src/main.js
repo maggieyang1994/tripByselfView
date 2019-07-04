@@ -10,6 +10,8 @@ import 'element-ui/lib/theme-chalk/index.css';
 // iconfont
 import "./icons"
 
+
+import './utils/axios'
 Vue.use(element)
 Vue.use(plugins)
 Vue.config.productionTip = false;
