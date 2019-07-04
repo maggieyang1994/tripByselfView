@@ -133,6 +133,7 @@ export const routes = [
 var router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
+  base: '/tripByselfView/',
   routes: routes.concat(mathRoutes)
 })
 router.beforeEach((to, from, next) => {
