@@ -20,6 +20,8 @@ import userDetail from './views/userDetail.vue'
 
 import Fans from './views/fans.vue'
 
+import Err from './views/404.vue'
+
 Vue.use(Router);
 //  如果这里不export routes 其他页面引入的时候拿不到routes
 // New Router 返回的是undefine 所以要额外export
@@ -68,6 +70,12 @@ export const routes = [
     path: '/login',
     name: Login.name,
     component: Login
+  },
+  {
+    path: '/404',
+    name: Err.name,
+    component: Err,
+    prop: true
   },
   {
     path: '/trip',
@@ -134,7 +142,18 @@ var router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   base: '/tripByselfView/',
-  routes: routes.concat(mathRoutes)
+  routes: routes.concat(mathRoutes),
+  scrollBehavior(to, from , savedPosition){
+    // 滚动到指定锚点
+    if(savedPosition) return savedPosition
+    else if(to.hash && document.querySelector(to.hash)){
+      // console.log(to.hash);
+      return {selector: to.hash, offset: {y : 200}}
+    }
+    else {
+      return {x: 0, y: 0}
+    }
+  }
 })
 router.beforeEach((to, from, next) => {
   if(to.name!=="login" && !Object.keys(store.state.userInfo).length){

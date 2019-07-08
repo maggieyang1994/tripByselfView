@@ -34,7 +34,7 @@ export default new Vuex.Store({
   actions: {
     setTrips({commit}){
       myAxios("/trip/getTotalTrips", 'get').then(res => {
-        commit("setTrips", res.data);
+        res && commit("setTrips", res.data);
       })
     }
   }

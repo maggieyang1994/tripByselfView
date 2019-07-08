@@ -47,7 +47,7 @@ export default {
     },
     $route(to, from){
       // this.activeName = to.name;
-      console.log(to, from);
+      // console.log(to, from);
       if(to.name==='trip') this.showMap = false
     }
   },

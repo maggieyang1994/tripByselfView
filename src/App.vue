@@ -1,12 +1,14 @@
 <template>
-  <div id="app">
+  <div id="app" v-loading ="loading">
     <!-- <div id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link>
     </div> -->
-    
-    <router-view/>
-     <div class="btmNav">
+    <!--  缓存组件  include指需要缓存的组件数组   exclude值不需要缓存的组件数组 -->
+    <keep-alive :exclude='["history"]'>
+      <router-view  />
+    </keep-alive>
+    <div class="btmNav">
       <el-tabs v-model="activeName" @tab-click="handleClick" :stretch="true">
         <el-tab-pane  :name="item.name" v-for="item in routes" :key="item.name">
           <div slot="label">
@@ -39,13 +41,18 @@ export default {
   // },
   methods: {
     handleClick(tab){
-      this.$router.push({name: tab.name});
+      // if(tab.name !== 'history') this.$router.push({name: tab.name})
+      // else this.$router.push({path: '/history/#bottom'})
+      this.$router.push({name: tab.name})
       this.activeName = tab.name;
     }
   },
   computed: {
     routes(){
       return this.$store.state.routes.filter(x => x.meta)
+    },
+    loading(){
+      return this.$store.state.loading;
     }
   },
   mounted(){

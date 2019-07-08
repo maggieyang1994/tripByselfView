@@ -1,6 +1,6 @@
 <template>
   <div class="history">
-    <y-map ref="map"></y-map>
+    <y-map ref="map"  v-bind:isInit.sync="isInit"></y-map>
 
 
     <!-- 上面遮罩層 -->
@@ -39,7 +39,7 @@ export default {
   name: 'historyDetail',
   data () {
     return {
-      
+      isInit: true
     }
   },
   props: {
@@ -50,7 +50,18 @@ export default {
   },
  methods: {
    
+  },
+watch: {
+  isInit(newV, oldV){
+    console.log(newV);
+    if(!newV){
+      // 画轨迹图
+      this.detail.trajectory && this.$refs.map.drawPolyline(JSON.parse(this.detail.trajectory))
+      // 瞄点
+      this.detail.endCode && this.$refs.map.drawMarker(...this.detail.endCode.split(","))
+    }
   }
+}
 }
 </script>
 
@@ -70,6 +81,9 @@ export default {
         margin-top:20px;
         text-align:left
       }
+   }
+   .history .amap-touch-toolbar .amap-zoomcontrol{
+     bottom: -29px
    }
 </style>
 

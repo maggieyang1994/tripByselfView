@@ -244,6 +244,7 @@ export default {
                  self.panelMessage.trafficDistance = result.routes[0].distance;
                }
               }
+              self.panelMessage.curDate = dayjs().format("YYYY-MM-DD")
             }
           );
       });
@@ -274,16 +275,16 @@ export default {
         userId: this.$store.state.userInfo.userId,
         type: 'traffic',
         tripType: this.ruleForm.trafficType,
-        distance: this.trafficDistance,
-        time: this.trafficTime,
-        date: this.curDate,
+        distance: this.panelMessage.trafficDistance,
+        time: this.panelMessage.trafficTime,
+        date: this.panelMessage.curDate,
         Calorie: this.Calories,
-        price: this.spend,
-        startPlace: this.routeFrom,
-        endPlace: this.routeTo,
+        price: this.panelMessage.spend,
+        startPlace: this.ruleForm.routeFrom,
+        endPlace: this.ruleForm.routeTo,
         startCode: this.routeCoordinate.routeFrom,
         endCode: this.routeCoordinate.routeTo,
-        mark: this.remarks
+        mark: this.panelMessage.remarks
 
       };
      

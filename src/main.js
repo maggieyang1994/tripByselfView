@@ -11,11 +11,11 @@ import 'element-ui/lib/theme-chalk/index.css';
 import "./icons"
 
 
-import './utils/axios'
+
 Vue.use(element)
 Vue.use(plugins)
 Vue.config.productionTip = false;
-
+import './utils/axios'
 
 new Vue({
   router,

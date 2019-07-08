@@ -203,6 +203,8 @@ export default {
     document.head.appendChild(aMapScript);
     aMapScript.onload = async function() {
       await self.init();
+      // init完毕之后  告诉其爸爸 init完成了
+      self.$emit("update:isInit", false)
       self.loading = false;
       self.loadRoute = true
     };

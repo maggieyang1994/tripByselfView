@@ -3,12 +3,12 @@
      <div class="history" v-if="!isShowDetail">
        <div class="title"><h3>出行历史</h3></div>
         <ul class="list">
-          <li v-for="item in list" v-bind:key="item.id">
+          <li v-for="item in list" v-bind:key="item.id"  @click ="showDetail(item)">
             <div>
               <p>{{item.tripType}}</p>
               <p>{{item.type==='traffic'? item.startPlace + "-" + item.endPlace : `行程${item.distance}公里`}}</p>
             </div>
-            <div @click ="showDetail(item)">{{item.date}}  <i class="el-icon-arrow-right"></i></div>
+            <div>{{item.date}}  <i class="el-icon-arrow-right"></i></div>
           </li>
         </ul>
      </div>
@@ -31,12 +31,7 @@ export default {
   },
   computed: {
     list(){
-      return this.$store.state.totalTrips
-    }
-  },
-  watch: {
-    list(newv){
-      console.log(newv)
+      return this.$store.state.totalTrips.sort((a,b) => dayjs(a.date).isBefore(b.date) ? 1 : -1)
     }
   },
   methods: {
@@ -52,6 +47,12 @@ export default {
   },
   mounted(){
    this.$store.dispatch("setTrips")
+  },
+  beforeRouteUpdate (to,from, next){
+   if(from.name === 'historyDetail'){
+      this.isShowDetail = false
+    };
+    next();
   }
 }
 </script>
