@@ -11,7 +11,6 @@ import 'element-ui/lib/theme-chalk/index.css';
 import "./icons"
 
 
-
 Vue.use(element)
 Vue.use(plugins)
 Vue.config.productionTip = false;
