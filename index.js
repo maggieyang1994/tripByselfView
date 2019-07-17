@@ -5,4 +5,4 @@ if(navigator.serviceWorker){
     console.log(e.message)
   })
 }
-console.log(rinima)
+console.log('rinima')

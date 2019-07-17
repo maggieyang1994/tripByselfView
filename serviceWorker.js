@@ -13,7 +13,7 @@ let cacheFile = [
 self.addEventListener("install", function(e){
     self.skipWaiting()
     // 确保安装成功后 添加文件到缓存
-    e.waitUtil(
+    e.waitUntil(
         caches.open(cacheName).then(cache => {
             return cache.addAll(cacheFile)
         })
@@ -30,15 +30,15 @@ self.addEventListener("fetch", function(e){
             // 缓存请求路径
             let cloneRequest = e.request.clone()
             if(response) {
-                console.log("没有缓存  直接请求")
+                console.log("读取缓存")
                 return response
             }
             else {
-                console.log("读取缓存")
+                console.log("没有缓存  直接请求")
                return  fetch(cloneRequest).then(response => {
                     let cloneResponse = response.clone()
                     console.log(response.type)
-                    if(!response || response.stauts !== 200){
+                    if(!response || response.status !== 200){
                         return response
                     }else{
                         caches.open(cacheName).then(cache => {
