@@ -1,4 +1,5 @@
 // The files we want to cache
+// const webpush = require('web-push');
 let cacheName = 'rinima';
 // 缓存文件和请求路径
 let cacheFile = [
@@ -83,20 +84,14 @@ self.addEventListener("fetch", function (e) {
 
 
 //  推送
-// self.addEventListener("push", function (event) {
-//     console.log("接受到push通知", event);
-//     var title = 'Yay a message.';
-//     var body = 'We have received a push message.';
-//     var icon = '/images/icon-192x192.png';
-//     var tag = 'simple-push-demo-notification-tag';
-//     event.waitUntil(
-//         self.registration.showNotification(title, {
-//             body,
-//             icon,
-//             tag
-//         })
-//     )
-// })
+self.addEventListener("push", function (event) {
+    console.log("接受到push通知", event);
+    var data = event.data.json();
+    console.log(data)
+    event.waitUntil(
+        self.registration.showNotification(data.title, data)
+    )
+})
 
 
 // 添加notificationclick事件监听器，在点击notification时触发

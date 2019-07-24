@@ -53,8 +53,17 @@ export default {
   },
   methods: {
     beginTrip(){
-      this.showMap = true
-      this.$router.push({name: 'tripMap', params: {tripType: this.activeTab}})
+      // this.showMap = true
+      // this.$router.push({name: 'tripMap', params: {tripType: this.activeTab}});
+
+      // practise 协商缓存
+      // myAxios('/getImage', 'get').then(res => {
+      //   console.log(res)
+      // })
+
+      myAxios('/user/sendNotifaction', 'get').then(res => {
+        console.log(res)
+      })
     },
   },
   mounted(){
