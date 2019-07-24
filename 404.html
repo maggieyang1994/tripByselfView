@@ -1,1 +1,53 @@
-<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=apple-mobile-web-app-capable content=yes><meta name=apple-mobile-web-app-status-bar-style content=default><meta name=apple-mobile-web-app-title content=tripRecord><link rel=apple-touch-icon href=img/logo.png><link rel=icon href=/tripByselfView/favicon.ico><link rel=manifest href=/tripByselfView/manifest.json><title>cli3-project</title><link href=/tripByselfView/css/app.5832fc6e.css rel=preload as=style><link href=/tripByselfView/css/chunk-vendors.5466ba4d.css rel=preload as=style><link href=/tripByselfView/js/app.777f649a.js rel=preload as=script><link href=/tripByselfView/js/chunk-vendors.a4ef4a2d.js rel=preload as=script><link href=/tripByselfView/css/chunk-vendors.5466ba4d.css rel=stylesheet><link href=/tripByselfView/css/app.5832fc6e.css rel=stylesheet></head><body><noscript><strong>We're sorry but cli3-project doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id=app></div><script src=/tripByselfView/js/chunk-vendors.a4ef4a2d.js></script><script src=/tripByselfView/js/app.777f649a.js></script></body></html><script src=/tripByselfView/index.js></script>
+<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=apple-mobile-web-app-capable content=yes><meta name=apple-mobile-web-app-status-bar-style content=default><meta name=apple-mobile-web-app-title content=tripRecord><link rel=apple-touch-icon href=img/logo.png><link rel=manifest href=/manifest.json><title>cli3-project</title><link href=/tripByselfView/css/app.a423831a.css rel=preload as=style><link href=/tripByselfView/css/chunk-vendors.5466ba4d.css rel=preload as=style><link href=/tripByselfView/js/app.ea4fe0fc.js rel=preload as=script><link href=/tripByselfView/js/chunk-vendors.a0301baf.js rel=preload as=script><link href=/tripByselfView/css/chunk-vendors.5466ba4d.css rel=stylesheet><link href=/tripByselfView/css/app.a423831a.css rel=stylesheet></head><body><noscript><strong>We're sorry but cli3-project doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id=app></div><script src=/tripByselfView/js/chunk-vendors.a0301baf.js></script><script src=/tripByselfView/js/app.ea4fe0fc.js></script></body></html><script>// 主线程开启一个service worker子线程
+  // res.installing  和res.waiting代表了子进程中的状态
+  navigator.serviceWorker.register('/serviceWorker.js').then(res => {
+    // 浏览器是否订阅了当前service worker
+    res.pushManager.getSubscription().then(subscribe => {
+      if (subscribe) {
+        console.log("你已经订阅了此通知")
+      } else {
+        subscribeUser(res);
+      }
+    })
+  })
+ async function subscribeUser(swRegistration) {
+    // 生成密钥对
+    let key = await myAxios('/user/generateKey', 'get');
+    key = key.data
+    const applicationServerPublicKey = key.publicKey
+    const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
+    swRegistration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: applicationServerKey
+    })
+      // 用户同意
+      .then(async function (subscription) {
+        debugger;
+        console.log(subscription);
+        // 将subscription 存到数据库
+        await myAxios('/user/saveFCMKey', 'post', {
+          publickKey: key.publicKey,
+          privateKey: key.privateKey,
+          subscription: subscription
+        })
+      })
+      // 用户不同意或者生成失败
+      .catch(function (err) {
+        console.log('Failed to subscribe the user: ', err);
+      });
+  }
+
+  function urlB64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }</script>
