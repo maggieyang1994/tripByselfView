@@ -36,4 +36,11 @@ module.exports = {
         config.resolve.alias.set("mixin", path.resolve(__dirname, 'src/plugin'))).set("@", path.resolve(__dirname, 'src')).end()
 
   }
+  // webpack3 写法
+  // resolve: {
+  //   alias: {
+  //     'mixin': path.resolve(__dirname, 'src/plugin'),
+  //     '@': path.resolve(__dirname, 'src')
+  //   }
+  // }
 }

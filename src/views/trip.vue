@@ -25,7 +25,7 @@
 // const bottomTripMap = {
 //   icon
 // }
-
+// import axios from 'axios'
 export default {
   name: "trip",
 
@@ -53,17 +53,18 @@ export default {
   },
   methods: {
     beginTrip(){
-      // this.showMap = true
-      // this.$router.push({name: 'tripMap', params: {tripType: this.activeTab}});
+      this.showMap = true
+      this.$router.push({name: 'tripMap', params: {tripType: this.activeTab}});
+      // practise 简单请求 复杂请求
 
-      // practise 协商缓存
-      // myAxios('/getImage', 'get').then(res => {
+      // axios.get('https://triprecord-server.herokuapp.com/trip/getTotalTrips').then(res => {
       //   console.log(res)
       // })
 
-      myAxios('/user/sendNotifaction', 'get').then(res => {
-        console.log(res)
-      })
+      // practise service worker push nofication
+      // myAxios('/user/sendNotifaction', 'get').then(res => {
+      //   console.log(res)
+      // })
     },
   },
   mounted(){

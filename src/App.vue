@@ -5,9 +5,9 @@
       <router-link to="/about">About</router-link>
     </div> -->
     <!--  缓存组件  include指需要缓存的组件数组   exclude值不需要缓存的组件数组 -->
-    <keep-alive :exclude='["traffic","history"]'>
+   
       <router-view  />
-    </keep-alive>
+   
     <div class="btmNav">
       <el-tabs v-model="activeName" @tab-click="handleClick" :stretch="true">
         <el-tab-pane  :name="item.name" v-for="item in routes" :key="item.name">
