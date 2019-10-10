@@ -4,7 +4,7 @@
   "start_url": "https://maggieyang1994.github.io/tripByselfView/trip",
   "display": "standalone",
   "background_color": "#333",
-  "description": "一个搜索图书的小WebAPP（基于豆瓣开放接口）",
+  "description": "一个行程跟踪的wepapp",
   "orientation": "portrait-primary",
   "theme_color": "#5eace0",
   "icons": [
