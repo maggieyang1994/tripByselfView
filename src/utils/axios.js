@@ -6,7 +6,7 @@ import router from  '@/router'
 // axios 发送的请求 默认不携带cookie
 // 携带cookie 前端和后端同时设置才有效
 // Access-Control-Allow-Credentials:true  Access-Control-Allow-origin:http://localhost:8080
-axios.defaults.withCredentials = true
+// axios.defaults.withCredentials = true
 
 const http = (url, method,params) => {
   let baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://triprecord-server.herokuapp.com';

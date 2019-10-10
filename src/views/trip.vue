@@ -40,7 +40,9 @@ export default {
     '$route.params': {
       handler: function(newV){
         let {showMap, distance} = newV;
-        if(distance) this.tripData.find(x => x.tripType === this.activeTab).distance = this.tripData.find(x => x.tripType === this.activeTab).distance + distance * 1;
+        let curTripIndex = this.tripData.findIndex(x => x.tripType === this.activeTab);
+        let curTrip = this.tripData.find(x => x.tripType === this.activeTab)
+        if(distance) this.$set(this.tripData, curTripIndex, {...curTrip, distance: curTrip.distance + distance * 1})
         if(showMap === false) this.showMap = false
       },
       deep: true
