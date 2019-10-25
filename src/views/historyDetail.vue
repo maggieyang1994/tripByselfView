@@ -71,7 +71,7 @@ watch: {
       box-sizing:border-box;
       z-index: 2;
       width: 100%;
-      height: 32%;
+      height: 40%;
       background-color: white;
       position: absolute;
       top: 0;

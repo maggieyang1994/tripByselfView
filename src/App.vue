@@ -58,6 +58,13 @@ export default {
   mounted(){
     let href = location.href.split("/");
     if(href.length) this.activeName = href[href.length - 1];
+    // 禁止上滑
+    document.querySelector("body").addEventListener("touchmove", function(e){
+      // e.preventDefault();
+      return false
+    },{
+      passive: false
+    })
   },
   watch: {
     $route(to, from){

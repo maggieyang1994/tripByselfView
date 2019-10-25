@@ -5,7 +5,7 @@ let cacheName = 'rinima';
 let cacheFile = [
 
 
-    'https://triprecord-server.herokuapp.com/trip/getTotalTrips'
+    'https://webapi.amap.com/maps?v=1.4.15&key=651f51a67d2e3cdaaea1e63d784cec0a'
 
 ]
 
@@ -52,13 +52,14 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener("fetch", function (e) {
+    console.log(e, 'fetch')
     e.respondWith(
         caches.match(e.request).then(response => {
             // 如果缓存有 直接返回缓存 否则就存到缓存中
 
             // 缓存请求路径
             let cloneRequest = e.request.clone()
-            if (response && e.request.url !== 'http://localhost:5000/trip/getTrips') {
+            if (response && e.request.url) {
                 console.log("读取缓存")
                 return response
             }
@@ -67,7 +68,7 @@ self.addEventListener("fetch", function (e) {
                 return fetch(cloneRequest).then(response => {
                     let cloneResponse = response.clone()
                     console.log(response.type)
-                    if (!response || response.status !== 200) {
+                    if (!response || response.status !== 200 || response.type === 'POST') {
                         return response
                     } else {
                         caches.open(cacheName).then(cache => {
