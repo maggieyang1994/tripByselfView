@@ -71,6 +71,8 @@ export default {
   },
   mounted(){
     myAxios('/trip/getTrips','get').then(res => {
+      let img = new Image();
+      img.src = '../assets/img/bg.png';
       this.tripData = res.data
     })
   }

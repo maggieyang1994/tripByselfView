@@ -44,6 +44,9 @@ export default {
       // }).then(res => {
         myAxios("/user/getUserDetail", 'get', {params:{userName: this.userName,password: this.password}}).then(res =>{
         if(res.data.code === 400){
+          // preload background img
+          let img = new Image();
+          img.src = '../assets/img/logo.png';
           this.$message.error(res.data.msg)
         }else{
           let tempObj = res.data.msg[0]
