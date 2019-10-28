@@ -11,7 +11,8 @@ export default new Vuex.Store({
     dialogMap: {},
     routes,
     totalTrips: [],
-    mathRoutes
+    mathRoutes,
+    ngixPath: 'http://150.109.45.170/images/'
   },
   mutations: {
     setUserInfo(state, data){

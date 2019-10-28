@@ -1,5 +1,5 @@
 <template>
-   <div class="tripWrapper">
+   <div class="tripWrapper" :style="{backgroundImage:'url(' + $store.state.ngixPath+'bg.png)'}">
      <div class="tab" v-if="!showMap">
        <!--  顶部导航 -->
        <el-tabs v-model="activeTab"  :stretch="true">
@@ -71,8 +71,6 @@ export default {
   },
   mounted(){
     myAxios('/trip/getTrips','get').then(res => {
-      let img = new Image();
-      img.src = '../assets/img/bg.png';
       this.tripData = res.data
     })
   }
@@ -80,7 +78,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .tripWrapper{
-  background-image: url("../assets/img/bg.png");
+  // background-image: url("../assets/img/bg.png");
   width:100%;
   height:100%;
   background-size: cover;

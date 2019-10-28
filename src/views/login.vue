@@ -1,7 +1,7 @@
 <template>
-  <div class="login">
+  <div :style="loginStyleObj" class="login">
     <div class="logo">
-      <img src="../assets/img/logo.png"/>
+      <img :src="$store.state.ngixPath + '/logo.png'"/>
     </div>
     <div class="loignMain">
       <div>
@@ -31,7 +31,10 @@ export default {
     return {
       userName: '',
       password: '',
-      rememberPassword: true
+      rememberPassword: true,
+      loginStyleObj: {
+        backgroundImage: `url("${this.$store.state.ngixPath}login-bg.jpg")`
+      }
     };
   },
   methods: {
@@ -45,8 +48,7 @@ export default {
         myAxios("/user/getUserDetail", 'get', {params:{userName: this.userName,password: this.password}}).then(res =>{
         if(res.data.code === 400){
           // preload background img
-          let img = new Image();
-          img.src = '../assets/img/logo.png';
+          
           this.$message.error(res.data.msg)
         }else{
           let tempObj = res.data.msg[0]
@@ -70,7 +72,6 @@ export default {
 </script>
 <style scoped lang="scss">
 .login {
-  background-image: url("../assets/img/login-bg.jpg");
   background-size: cover;
   width: 100%;
   height: 100%;
