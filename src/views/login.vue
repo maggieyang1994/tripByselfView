@@ -1,7 +1,7 @@
 <template>
   <div :style="loginStyleObj" class="login">
     <div class="logo">
-      <img :src="$store.state.ngixPath + '/logo.png'"/>
+      <img :src="$store.state.ngixPath + 'logo.png'"/>
     </div>
     <div class="loignMain">
       <div>
@@ -29,8 +29,8 @@ export default {
   name: "login",
   data() {
     return {
-      userName: '',
-      password: '',
+      userName: '18124134072',
+      password: '12345',
       rememberPassword: true,
       loginStyleObj: {
         backgroundImage: `url("${this.$store.state.ngixPath}login-bg.jpg")`
@@ -62,6 +62,11 @@ export default {
         console.log(e)
       })
     }
+  },
+  created(){
+    myAxios('/user/logout','get',{
+      login_id: this.$store.state.userInfo.name
+    })
   },
   watch: {
     userName(newV){

@@ -88,6 +88,9 @@ export default {
       }
     },
     loginout(){
+      myAxios('/user/logout','get',{
+         login_id: this.$store.state.userInfo.name
+      })
       this.$router.push({
         name: "login"
       })

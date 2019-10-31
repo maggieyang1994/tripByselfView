@@ -155,11 +155,11 @@ var router = new Router({
     }
   }
 })
-router.beforeEach((to, from, next) => {
-  if(to.name!=="login" && !Object.keys(store.state.userInfo).length){
-    next("/login")
-  } else {
-    next()
-  }
-})
+// router.beforeEach((to, from, next) => {
+//   if(to.name!=="login" && localStorage.getItem('')){
+//     next("/login")
+//   } else {
+//     next()
+//   }
+// })
 export default router

@@ -12,7 +12,8 @@ export default new Vuex.Store({
     routes,
     totalTrips: [],
     mathRoutes,
-    ngixPath: 'http://150.109.45.170/images/'
+    // chrome 会自动将http转为https
+    ngixPath: 'https://150.109.45.170/images/'
   },
   mutations: {
     setUserInfo(state, data){

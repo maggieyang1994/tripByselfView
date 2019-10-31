@@ -78,6 +78,16 @@ export default {
 html, body{
   height: 100%
 }
+body:before{
+  width: 100%;
+  height: 100%;
+  content: ' ';
+  position: fixed;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  background: #fff;
+  }
 ul li{
   list-style:none
 };
