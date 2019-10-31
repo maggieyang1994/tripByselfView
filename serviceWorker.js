@@ -5,7 +5,8 @@ let cacheName = 'rinima';
 let cacheFile = [
 
 
-    'https://webapi.amap.com/maps?v=1.4.15&key=651f51a67d2e3cdaaea1e63d784cec0a'
+    'https://webapi.amap.com/maps?v=1.4.15&key=651f51a67d2e3cdaaea1e63d784cec0a',
+    'https://webapi.amap.com/maps/cookie?key=amap_ver&value=1571644530085&callback=jsonp_499535_&platform=JS&logversion=2.0&appname=http%3A%2F%2Flocalhost%3A8080%2FtripByselfView%2Ftraffic&csid=9F925999-1BA4-4574-9C17-02B458C46724&sdkversion=1.4.15'
 
 ]
 
