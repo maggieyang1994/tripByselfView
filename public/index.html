@@ -34,7 +34,7 @@ html,body{height:100%;overflow:hidden;}
  <script>
   // 主线程开启一个service worker子线程
   // res.installing  和res.waiting代表了子进程中的状态
-  navigator.serviceWorker.register('/serviceWorker.js').then(res => {
+  navigator.serviceWorker.register('/tripByselfView/serviceWorker.js').then(res => {
     // 浏览器是否订阅了当前service worker
     res.pushManager.getSubscription().then(subscribe => {
       if (subscribe) {
