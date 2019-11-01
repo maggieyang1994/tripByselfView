@@ -15,7 +15,8 @@ html,body{height:100%;overflow:hidden;}
   <link rel="apple-touch-icon" href="img/logo.png">
 
   <!-- <link rel="icon" href="<%= BASE_URL %>favicon.ico"> -->
-  <link rel="manifest" href="/manifest.json">
+  <!-- 开发环境下需要加上基路径 -->
+  <link rel="manifest" href="./manifest.json">
   <!-- <link rel="manifest" href="/tripByselfView/manifest.json"> -->
   <title>TripRecord</title>
 </head>
@@ -34,7 +35,7 @@ html,body{height:100%;overflow:hidden;}
  <script>
   // 主线程开启一个service worker子线程
   // res.installing  和res.waiting代表了子进程中的状态
-  navigator.serviceWorker.register('/tripByselfView/serviceWorker.js').then(res => {
+  navigator.serviceWorker.register('./serviceWorker.js').then(res => {
     // 浏览器是否订阅了当前service worker
     res.pushManager.getSubscription().then(subscribe => {
       if (subscribe) {
