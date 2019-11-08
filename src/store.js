@@ -13,7 +13,7 @@ export default new Vuex.Store({
     totalTrips: [],
     mathRoutes,
     // chrome 会自动将http转为https
-    ngixPath: 'https://150.109.45.170/images/'
+    ngixPath: 'https://fedev.me/images'
   },
   mutations: {
     setUserInfo(state, data){

@@ -59,6 +59,10 @@ export const mathRoutes = [
     props: true,
     name: Fans.name,
     component: Fans,
+  },
+  {
+    path: '*',
+    redirect: "/trip"
   }
 ]
 export const routes = [
