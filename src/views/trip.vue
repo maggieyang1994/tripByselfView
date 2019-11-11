@@ -1,5 +1,5 @@
 <template>
-   <div class="tripWrapper" :style="{backgroundImage:'url(' + $store.state.ngixPath+'bg.png)'}">
+   <div class="tripWrapper" :style="{backgroundImage:'url(' + $store.state.ngixPath+'bg.png)'}" @mousedown="forbiddenSlide" @touchstart='forbiddenSlide' @touchmove='forbiddenSlide'>
      <div class="tab" v-if="!showMap">
        <!--  顶部导航 -->
        <el-tabs v-model="activeTab"  :stretch="true">
@@ -22,6 +22,7 @@
  </div>
 </template>
 <script>
+// import axios from 'axios'
 // const bottomTripMap = {
 //   icon
 // }
@@ -67,11 +68,17 @@ export default {
       // myAxios('/user/sendNotifaction', 'get').then(res => {
       //   console.log(res)
       // })
+      // axios.get("http://localhost:5000/getImage").then(res => {
+      //   console.log(res)
+      // })
     },
+    forbiddenSlide(e){
+     e.preventDefault()
+    }
   },
   mounted(){
     myAxios('/trip/getTrips','get').then(res => {
-      this.tripData = res.data
+      res && (this.tripData = res.data)
     })
   }
 }

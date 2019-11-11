@@ -58,13 +58,6 @@ export default {
   mounted(){
     let href = location.href.split("/");
     if(href.length) this.activeName = href[href.length - 1];
-    // 禁止上滑
-    document.querySelector("body").addEventListener("touchmove", function(e){
-      // e.preventDefault();
-      return false
-    },{
-      passive: false
-    })
   },
   watch: {
     $route(to, from){
@@ -75,6 +68,16 @@ export default {
 </script>
 
 <style lang="scss">
+body:before {
+    width: 100%;
+		height: 100%;
+		content: ' ';
+		position: fixed;
+		z-index: -1;
+		top: 0;
+		left: 0;
+		background: #fff;
+	}
 html, body{
   height: 100%
 }
