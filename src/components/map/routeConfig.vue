@@ -110,9 +110,8 @@
 </div>
 </template>
 <script>
-
-import dayjs from 'dayjs';
-import axios from 'axios';
+import dayjs from "dayjs";
+import axios from "axios";
 export default {
   props: {
     map: {
@@ -124,67 +123,72 @@ export default {
       require: true
     }
   },
-  data(){
-    const tripTypeMap = JSON.parse('[{"value":"Walking","label":"步行"},{"value":"Transfer","label":"公交/地铁"},{"value":"Riding","label":"骑行"},{"value":"Driving","label":"自驾"}]');
+  data() {
+    const tripTypeMap = [
+      { value: "Walking", label: "步行", routeKey: 'steps'},
+      { value: "Transfer", label: "公交/地铁", routeKey: ''},
+      { value: "Riding", label: "骑行" , routeKey: 'rides'},
+      { value: "Driving", label: "自驾" , routeKey: 'steps'}
+    ];
     return {
       routeCoordinate: {},
       policyMap: {},
       currentPolicyOption: [],
       tripTypeMap,
       ruleForm: {
-        routeFrom: '',
-        routeTo: '',
-        trafficType: 'Walking',
-        selectedPolicy: 'Default'
+        routeFrom: "",
+        routeTo: "",
+        trafficType: "Walking",
+        selectedPolicy: "Default"
       },
       rules: {
         routeFrom: [
-          {required: true, message: "请输入起点", trigger: "change"}
+          { required: true, message: "请输入起点", trigger: "change" }
         ],
-        routeTo: [
-          {required: true, message: "请输入终点", trigger: "change"}
-        ],
+        routeTo: [{ required: true, message: "请输入终点", trigger: "change" }],
         selectedPolicy: [
-          {required: true, message: "请选择出行策略", trigger: "change"}
+          { required: true, message: "请选择出行策略", trigger: "change" }
         ]
       },
 
-
       // panel
-      
+
       showPanel: false,
       dialogVisible: false,
-      saveErrorMessage:"",
+      saveErrorMessage: "",
       isPanelCollapse: true,
-      
+
       panelMessage: {
-        remarks:'',
-        curDate: '',
+        remarks: "",
+        curDate: "",
         trafficTime: "",
-        trafficDistance: '',
+        trafficDistance: "",
         spend: 0
       }
-    }
+    };
   },
   methods: {
-    clickOutSide(e){
+    clickOutSide(e) {
       // document.querySelector("#panel") && (document.querySelector("#panel").innerHTML = '')
       // this.showPanel && (this.showPanel = false)
     },
     reverseRoute() {
-      [this.ruleForm.routeFrom, this.ruleForm.routeTo] = [this.ruleForm.routeTo, this.ruleForm.routeFrom];
+      [this.ruleForm.routeFrom, this.ruleForm.routeTo] = [
+        this.ruleForm.routeTo,
+        this.ruleForm.routeFrom
+      ];
       let temp = JSON.parse(JSON.stringify(this.routeCoordinate));
       this.routeCoordinate.routeFrom = temp.routeTo;
       this.routeCoordinate.routeTo = temp.routeFrom;
     },
-    async getDrivingPlugin(trafficType){
-     var self = this;
-     return new Promise((resolve, reject) => {
-       AMap.plugin(`AMap.${trafficType}`, function(){
-         resolve();
-       })
-     })
-   },
+    async getDrivingPlugin(trafficType) {
+      var self = this;
+      return new Promise((resolve, reject) => {
+        AMap.plugin(`AMap.${trafficType}`, function() {
+          resolve();
+        });
+      });
+    },
     placeSearch(key) {
       var self = this;
       AMap.plugin("AMap.Autocomplete", function() {
@@ -204,76 +208,87 @@ export default {
     beginRoute(formName) {
       // 开始验证
       var self = this;
-      this.$refs[formName].validate((valid) => {
-         if(!valid) return false;
-         // 验证通过   开始路线规划
-         // 设置驾车路线规划策略
-         // 先将之前的清空
-         document.querySelector("#panel") && (document.querySelector("#panel").innerHTML = '')
-          let tempOption = {
-            map: self.map,
-            autoFitView: true,
-            panel: 'panel'
-          }
-          self.ruleForm.trafficType !== 'Walking' && (tempOption.policy = AMap[self.ruleForm.trafficType+'Policy'][self.ruleForm.selectedPolicy])
-          self.ruleForm.trafficType === 'Transfer' && (tempOption.city = self.city)
-          let trafficType = new AMap[self.ruleForm.trafficType](tempOption);
-          trafficType.search(
-            self.routeCoordinate.routeFrom,
-            self.routeCoordinate.routeTo,
-            function(status, result) {
-              // 未出错时，result即是对应的路线规划方案
-              console.log(status, result);
-              if(status === 'error' || status === 'no_data'){
-                 self.$message({
-                  showClose: true,
-                  message: '查不到信息，请修改起始路线',
-                  type: 'error'
+      this.$refs[formName].validate(valid => {
+        if (!valid) return false;
+        // 验证通过   开始路线规划
+        // 设置驾车路线规划策略
+        // 先将之前的清空
+        document.querySelector("#panel") &&
+          (document.querySelector("#panel").innerHTML = "");
+        let tempOption = {
+          map: self.map,
+          autoFitView: true,
+          panel: "panel"
+        };
+        self.ruleForm.trafficType !== "Walking" &&
+          (tempOption.policy =
+            AMap[self.ruleForm.trafficType + "Policy"][
+              self.ruleForm.selectedPolicy
+            ]);
+        self.ruleForm.trafficType === "Transfer" &&
+          (tempOption.city = self.city);
+        let trafficType = new AMap[self.ruleForm.trafficType](tempOption);
+        trafficType.search(
+          self.routeCoordinate.routeFrom,
+          self.routeCoordinate.routeTo,
+          function(status, result) {
+            // 未出错时，result即是对应的路线规划方案
+            console.log(status, result);
+            if (status === "error" || status === "no_data") {
+              self.$message({
+                showClose: true,
+                message: "查不到信息，请修改起始路线",
+                type: "error"
+              });
+            } else {
+              self.showPanel = true;
+              self.isPanelCollapse = true;
+              if (self.ruleForm.trafficType === "Transfer") {
+                // 无ruote you plan;
+                self.$nextTick(() => {
+                  self.onSelectTranfer(result);
                 });
-              }else{
-               self.showPanel = true;
-               self.isPanelCollapse = true;
-               if(self.ruleForm.trafficType === 'Transfer'){
-                 // 无ruote you plan;
-                  self.$nextTick(() => {
-                    self.onSelectTranfer(result)
-                  })
-                  
-               }else{
-                 self.panelMessage.trafficTime = result.routes[0].time;
-                 self.panelMessage.trafficDistance = result.routes[0].distance;
-               }
+              } else {
+                let map = {};
+                self.panelMessage.trafficTime = result.routes[0].time;
+                self.panelMessage.trafficDistance = result.routes[0].distance;
+                self.panelMessage.trajectory = [].concat(
+                  ...result.routes[0][self.tripTypeMap.find(x => x.value === self.ruleForm.trafficType).routeKey].map(x => x.path)
+                );
               }
-              self.panelMessage.curDate = dayjs().format("YYYY-MM-DD")
             }
-          );
+            self.panelMessage.curDate = dayjs().format("YYYY-MM-DD");
+          }
+        );
       });
     },
-    onSelectTranfer(route){
+    onSelectTranfer(route) {
       var self = this;
       let planTitles = document.querySelectorAll(".planTitle");
       let len = planTitles.length;
-      const callback = (cur) => {
+      const callback = cur => {
         // console.log(this)
-        let  index = cur.currentTarget.getAttribute("index")
-        let  selectedPlans = route.plans[index];
+        let index = cur.currentTarget.getAttribute("index");
+        let selectedPlans = route.plans[index];
         self.panelMessage.spend = selectedPlans.cost;
         self.panelMessage.trafficTime = selectedPlans.time;
-        self.panelMessage.trafficDistance = selectedPlans.transit_distance + selectedPlans.walking_distance
-      }
-      if(len){
-        for(let i = 0; i<len;i++){
+        self.panelMessage.trafficDistance =
+          selectedPlans.transit_distance + selectedPlans.walking_distance;
+        self.panelMessage.trajectory = selectedPlans.path;
+      };
+      if (len) {
+        for (let i = 0; i < len; i++) {
           let cur = planTitles[i];
           cur.removeEventListener("click", callback);
-          cur.addEventListener("click", callback)
+          cur.addEventListener("click", callback);
         }
       }
     },
-    confirmSave(){
+    confirmSave() {
       // 保存到数据库
       let params = {
         userId: this.$store.state.userInfo.userId,
-        type: 'traffic',
+        type: "traffic",
         tripType: this.ruleForm.trafficType,
         distance: this.panelMessage.trafficDistance,
         time: this.panelMessage.trafficTime,
@@ -284,123 +299,129 @@ export default {
         endPlace: this.ruleForm.routeTo,
         startCode: this.routeCoordinate.routeFrom,
         endCode: this.routeCoordinate.routeTo,
-        mark: this.panelMessage.remarks
-
+        mark: this.panelMessage.remarks,
+        trajectory: JSON.stringify(this.panelMessage.trajectory)
       };
-     
-       myAxios("/trip/saveTrip", 'post', params).then(res => {
-        console.log(res);
-        if(res.data.code){
-           this.$message({
-            showClose: true,
-            message:'保存成功,此次记录已经上传',
-            type:  'success'
-          })
-          this.showPanel = false;
-          this.ruleForm.routeTo = '';
-          this.ruleForm.routeFrom = '';
-          this.spend = 0;
-          this.remarks = '';
-          this.$refs['ruleForm'].resetFields();
-          this.dialogVisible = false
-        } else {
-        //   this.$alert(`<span style="color:red">${res.data.error}</span>`, '保存失败', {
-        //   dangerouslyUseHTMLString: true
-        // });
-          this.saveErrorMessage = res.data.error
-        }
-       
-      }).catch(err => {
-        console.log(err)
-      })
-    },
+
+      myAxios("/trip/saveTrip", "post", params)
+        .then(res => {
+          console.log(res);
+          if (res.data.code) {
+            this.$message({
+              showClose: true,
+              message: "保存成功,此次记录已经上传",
+              type: "success"
+            });
+            this.showPanel = false;
+            this.ruleForm.routeTo = "";
+            this.ruleForm.routeFrom = "";
+            this.spend = 0;
+            this.remarks = "";
+            this.$refs["ruleForm"].resetFields();
+            this.dialogVisible = false;
+          } else {
+            //   this.$alert(`<span style="color:red">${res.data.error}</span>`, '保存失败', {
+            //   dangerouslyUseHTMLString: true
+            // });
+            this.saveErrorMessage = res.data.error;
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
   },
   watch: {
-   'ruleForm.trafficType': {
-     handler: function(newV){
-       this.ruleForm.selectedPolicy = newV ===  'Walking' ? 'Default': '';
-       this.policyMap[newV] && this.policyMap[newV].length && (this.currentPolicyOption = this.policyMap[newV]);
-      //  this.computeRules = newV === 'Walking' ? {routeFrom: this.rules.routeFrom,routeTo: this.rules.routeTo}: this.rules;
-      //  console.log(this.computeRules)
-     }, 
-     // 代表在wacth里声明了这个方法之后立即先去执行handler方法
-    // immediate: true
-   }
+    "ruleForm.trafficType": {
+      handler: function(newV) {
+        this.ruleForm.selectedPolicy = newV === "Walking" ? "Default" : "";
+        this.policyMap[newV] &&
+          this.policyMap[newV].length &&
+          (this.currentPolicyOption = this.policyMap[newV]);
+        //  this.computeRules = newV === 'Walking' ? {routeFrom: this.rules.routeFrom,routeTo: this.rules.routeTo}: this.rules;
+        //  console.log(this.computeRules)
+      }
+      // 代表在wacth里声明了这个方法之后立即先去执行handler方法
+      // immediate: true
+    }
   },
-  mounted(){
-      
-      // 初始化 规划插件
+  mounted() {
+    // 初始化 规划插件
     var self = this;
     let tempMap = self.tripTypeMap.map(x => self.getDrivingPlugin(x.value));
     Promise.all(tempMap).then(res => {
-      self.policyMap = self.tripTypeMap.map(x => x.value).filter(x => x !=='Walking').reduce((o, item) => {
-          let temp =  AMap[item + 'Policy'];
-          let arr = []
-          for(let  key in temp){
+      self.policyMap = self.tripTypeMap
+        .map(x => x.value)
+        .filter(x => x !== "Walking")
+        .reduce((o, item) => {
+          let temp = AMap[item + "Policy"];
+          let arr = [];
+          for (let key in temp) {
             arr.push({
               value: key,
               label: key
-            })
+            });
           }
           o[item] = arr;
-          return o
-      }, {})
+          return o;
+        }, {});
     });
 
     // 路线提示
-  this.placeSearch("routeFrom");
-  this.placeSearch("routeTo");
+    this.placeSearch("routeFrom");
+    this.placeSearch("routeTo");
   }
-}
+};
 </script>
 <style scoped lang="scss">
+.amap-touch-toolbar .amap-zoomcontrol{
+  bottom: -37px!important
+};
 .route {
-    position: fixed;
-    top: 0px;
-    z-index: 2;
-    width: 100%;
-    padding-bottom:20px;
-    background-color:white;
-    .reverseButton{
-      display:block;
-      margin-top:-16px;
-    }
-    
-  };
+  position: fixed;
+  top: 0px;
+  z-index: 2;
+  width: 100%;
+  padding-bottom: 20px;
+  background-color: white;
+  .reverseButton {
+    display: block;
+    margin-top: -16px;
+  }
+}
 
-#panelWrapper{
+#panelWrapper {
+  position: absolute;
+  bottom: 57px;
+  height: 50%;
+  overflow-y: scroll;
+  width: 100%;
+  background-color: white;
+  z-index: 1;
+  // padding-bottom:30px;
+}
+.confirm {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+.collapse {
+  // position: absolute;
+  // top: 10px;
+  // left: 2px;
+  // width: 100%;
+  margin-bottom: 11px;
+  span {
     position: absolute;
-    bottom: 57px;
-    height: 50%;
-    overflow-y: scroll;
-    width: 100%;
-    background-color: white;
-    z-index: 1;
-    // padding-bottom:30px;
-    
-  };
-  .confirm{
+    left: 2px;
+  }
+  button {
     position: absolute;
-    bottom: 0;
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-    transform: translateX(-50%);
-    z-index: 1;
-  };
-  .collapse{
-      // position: absolute;
-      // top: 10px;
-      // left: 2px;
-      // width: 100%;
-      margin-bottom: 11px;
-      span{
-        position:absolute;
-        left: 2px;
-      };
-      button{
-        position:absolute;
-        right: 0;
-      };
-    }
-  </style>
+    right: 0;
+  }
+}
+</style>
 

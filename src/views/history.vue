@@ -2,7 +2,7 @@
    <div class="historyWrapper">
      <div class="history" v-if="!isShowDetail">
        <div class="title"><h3>出行历史</h3></div>
-        <ul class="list">
+        <ul class="list" v-if="list.length">
           <li v-for="item in list" v-bind:key="item.id"  @click ="showDetail(item)">
             <div>
               <p>{{item.tripType}}</p>
@@ -11,6 +11,9 @@
             <div>{{item.date}}  <i class="el-icon-arrow-right"></i></div>
           </li>
         </ul>
+        <div v-else>
+          No data
+        </div>
      </div>
      <div class="historyDetail" v-else>
        <router-view/>
@@ -31,7 +34,7 @@ export default {
   },
   computed: {
     list(){
-      return this.$store.state.totalTrips.sort((a,b) => dayjs(a.date).isBefore(b.date) ? 1 : -1)
+      return this.$store.state.totalTrips.map(x => ({...x, date: dayjs(x.date).format("YYYY-MM-DD hh:mm:ss")})).sort((a,b) => dayjs(a.date).isBefore(b.date) ? 1 : -1)
     }
   },
   methods: {

@@ -71,7 +71,13 @@ export default {
   },
   mounted(){
     myAxios('/trip/getTrips','get').then(res => {
-      this.tripData = res.data
+      this.tripData = ["骑车出行", "跑步出行","自驾出行","徒步出行"].map(x => {
+       let temp = res.data.filter(x => x.tripType === x);
+       return {
+         tripType: x,
+         distance: (temp && temp.distance) || 0
+       }
+     })
     })
   }
 }

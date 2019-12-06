@@ -183,7 +183,7 @@ export default {
           strokeColor: '#fff', // 线条颜色
           isOutline: true,	// 是否描边
           outlineColor: 'red', // 描边颜色
-          borderWeight: 5, // 描边宽度
+          borderWeight: 2, // 描边宽度
           lineJoin: 'round', // 折线拐点连接处样式
           zIndex: 1000
         });

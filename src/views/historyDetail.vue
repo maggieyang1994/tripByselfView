@@ -72,6 +72,9 @@ watch: {
 </script>
 
 <style lang="scss" scoped>
+.amap-touch-toolbar .amap-zoomcontrol{
+  bottom: -37px!important
+};
    .detailWrapper{
       padding:14px;
       box-sizing:border-box;
