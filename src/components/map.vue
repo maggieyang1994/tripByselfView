@@ -184,7 +184,8 @@ export default {
           isOutline: true,	// 是否描边
           outlineColor: 'red', // 描边颜色
           borderWeight: 5, // 描边宽度
-          lineJoin: 'round' // 折线拐点连接处样式
+          lineJoin: 'round', // 折线拐点连接处样式
+          zIndex: 1000
         });
         // 将折线添加至地图实例
         self.map.add(self.polyline);

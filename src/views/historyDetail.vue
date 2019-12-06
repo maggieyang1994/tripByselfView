@@ -10,11 +10,11 @@
          <span>{{detail.date.substring(0, 10)}}</span>
       </div>
       <div style="text-align:center">
-        <h2>{{detail.distance}}公里</h2>
+        <h2>{{detail.distance / 1000}}公里</h2>
       </div>
       <div style="display: flex;justify-content: space-around">
           <p>
-            <span>{{detail.time}}</span><br/>
+            <span>{{ formatSecond(detail.time)}}</span><br/>
             <span>总计时间</span>
           </p>
           <p>
@@ -49,14 +49,20 @@ export default {
     }
   },
  methods: {
-   
-  },
+   formatSecond(result){
+    const h = Math.floor((result / 3600) % 24) + ''
+    const m = Math.floor((result / 60) % 60)+ '';
+    const s = Math.floor(result % 60)+ '';
+    result = s + "秒";
+    return `${h.padStart(2, "0")}:${m.padStart(2, "0")}:${s.padStart(2, "0")}`
+   }
+},
 watch: {
   isInit(newV, oldV){
     console.log(newV);
     if(!newV){
       // 画轨迹图
-      this.detail.trajectory && this.$refs.map.drawPolyline(JSON.parse(this.detail.trajectory))
+      this.$refs.map.drawPolyline(this.detail.trajectory ? JSON.parse(this.detail.trajectory): [[this.detail.startCode],[this.detail.endCode]])
       // 瞄点
       this.detail.endCode && this.$refs.map.drawMarker(...this.detail.endCode.split(","))
     }

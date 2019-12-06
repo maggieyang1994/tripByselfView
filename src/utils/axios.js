@@ -21,7 +21,7 @@ const http = (url, method,params) => {
   // 请求拦截
   axios.interceptors.request.use(config => {
     store.commit('setLoading', true);
-    config.headers['login_id'] = store.state.userInfo.name
+    config.headers['login_id'] = encodeURI(store.state.userInfo.name)
     return config
   }, err => {
     router.push({name: 'error'})
