@@ -5,6 +5,9 @@ function resolve(dir) {
 }
 
 module.exports = {
+  devServer: {
+    https: true,
+  },
   // resolve: {
   //   alias: {
   //     'mixin': path.resolve(__dirname, "src/plugin")

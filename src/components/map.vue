@@ -102,7 +102,7 @@ export default {
         self.map.addControl(toolbar);
       });
       // 初始定位
-      await this.getPosition();
+      this.getPosition();
 
       
     },
@@ -149,7 +149,8 @@ export default {
 
           function onError(data) {
             // 定位出错
-            this.$message({
+            self.positioning = false;
+            self.$message({
               showClose: true,
               message: "定位失败",
               type: "error"
