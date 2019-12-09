@@ -1,6 +1,6 @@
 <template>
   <div class="history">
-    <y-map ref="map"  v-bind:isInit.sync="isInit"></y-map>
+    <y-map ref="map"  v-bind:isInit.sync="isInit" :needPosition="false" :center="detail.endCode.split(',')"></y-map>
 
 
     <!-- 上面遮罩層 -->

@@ -48,9 +48,16 @@ export default {
     tripType: {
       type: String
     },
+    center: {
+      type: Array
+    },
     showRoute: {
       type: Boolean,
       default: false
+    },
+    needPosition: {
+      type: Boolean,
+      default: true
     }
   },
   
@@ -64,7 +71,7 @@ export default {
       positioning: false,
       loading: true,
       loadRoute: false,
- 
+      city: "",
       marker: null,
       longitude: "",
       latitude: "",
@@ -89,10 +96,12 @@ export default {
     },
     async init() {
       var self = this;
-      this.map = new AMap.Map("map", {
+      let tempOption = {
         resizeEnable: true,
         zoom: 17
-      });
+      }
+      if (self.center && self.center.length) tempOption.center = self.center
+      this.map = new AMap.Map("map", tempOption);
       this.map.setMapStyle(`amap://styles/${this.$store.state.mapColor}`);
 
       // 添加缩小放大
@@ -102,8 +111,9 @@ export default {
         self.map.addControl(toolbar);
       });
       // 初始定位
-      this.getPosition();
-
+      // historyDetail 不需要getPosition
+      // this.needPosition && 
+      this.needPosition && this.getPosition();
       
     },
     async getPosition() {
@@ -133,6 +143,8 @@ export default {
           AMap.event.addListener(geolocation, "error", onError);
 
           function onComplete(data) {
+            // 定位成功 开开始路线规划
+            self.loadRoute = true
             self.address = data.formattedAddress;
             self.district = data.addressComponent.district;
             self.positioning = false;
@@ -208,7 +220,7 @@ export default {
       // init完毕之后  告诉其爸爸 init完成了
       self.$emit("update:isInit", false)
       self.loading = false;
-      self.loadRoute = true
+     
     };
 
 

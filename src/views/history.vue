@@ -34,7 +34,7 @@ export default {
   },
   computed: {
     list(){
-      return this.$store.state.totalTrips.map(x => ({...x, date: dayjs(x.date).format("YYYY-MM-DD hh:mm:ss")})).sort((a,b) => dayjs(a.date).isBefore(b.date) ? 1 : -1)
+      return this.$store.state.totalTrips.map(x => ({...x, date: dayjs(x.date).format("YYYY-MM-DD HH:mm:ss")})).sort((a,b) => dayjs(a.date).isBefore(b.date) ? 1 : -1)
     }
   },
   methods: {

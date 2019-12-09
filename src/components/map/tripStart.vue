@@ -133,7 +133,7 @@ export default {
       this.timer = null;
       this.isQuit = true
       // // 瞄点
-      if(this.path.length){
+      if(this.path.length && this.distance >= 0.01){
         let tempMarker = this.path[this.path.length - 1]
         that.drawMarker(tempMarker.Q, tempMarker.P);
 
@@ -147,7 +147,7 @@ export default {
           tripType: this.tripType,
           distance: this.distance,
           time: this.sec,
-          date: dayjs().format("YYYY-MM-DD"),
+          date: dayjs().format("YYYY-MM-DD HH:mm:ss"),
           trajectory: JSON.stringify(this.path),
           Calorie: this.Calories,
           speed: this.speed,
@@ -175,7 +175,7 @@ export default {
       }else {
         this.$message({
           showClose: true,
-          message: '本次行程距离为零，默认不上传'
+          message: '本次行程距离过短，默认不上传'
         })
       }
       

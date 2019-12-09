@@ -78,7 +78,6 @@ export default {
          distance: (temp && temp.distance) || 0
        }
      })
-     console.log(this.tripData)
     })
   }
 }

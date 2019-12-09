@@ -257,7 +257,7 @@ export default {
                 );
               }
             }
-            self.panelMessage.curDate = dayjs().format("YYYY-MM-DD");
+            self.panelMessage.curDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
           }
         );
       });
@@ -286,6 +286,7 @@ export default {
     },
     confirmSave() {
       // 保存到数据库
+      this.$store.commit("setLoading", true)
       let params = {
         userId: this.$store.state.userInfo.userId,
         type: "traffic",
@@ -323,10 +324,12 @@ export default {
             //   this.$alert(`<span style="color:red">${res.data.error}</span>`, '保存失败', {
             //   dangerouslyUseHTMLString: true
             // });
+            this.$store.commit("setLoading", false)
             this.saveErrorMessage = res.data.error;
           }
         })
         .catch(err => {
+          this.$store.commit("setLoading", false)
           console.log(err);
         });
     }
