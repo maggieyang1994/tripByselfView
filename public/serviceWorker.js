@@ -54,33 +54,22 @@ self.addEventListener('activate', event => {
 
 self.addEventListener("fetch", function (e) {
     console.log(e, 'fetch')
+    // 有网络的情况下 优先网络
+    let cloneRequest = e.request.clone()
     e.respondWith(
-        caches.match(e.request).then(response => {
-            // 如果缓存有 直接返回缓存 否则就存到缓存中
-
-            // 缓存请求路径
-            let cloneRequest = e.request.clone()
-            if (response && e.request.url) {
-                console.log("读取缓存")
-                return response
-            }
-            else {
-                console.log("没有缓存  直接请求")
-                return fetch(cloneRequest).then(response => {
-                    let cloneResponse = response.clone()
-                    console.log(response.type)
-                    if (!response || response.status !== 200 || response.type === 'POST') {
-                        return response
-                    } else {
-                        caches.open(cacheName).then(cache => {
-                            cache.put(e.request, cloneResponse)
-                        })
-                    }
-                    return response
-                })
-            }
+         fetch(cloneRequest).then(response => {
+            let cloneResponse = response.clone()
+            caches.open(cacheName).then(cache => {
+                cache.put(e.request, cloneResponse)
+            });
+            console.log('network online')
+            return response
+        }).catch(() => {
+            console.log('network offline, use cache')
+            return caches.match(e.request)
         })
     )
+
 })
 
 
