@@ -6,7 +6,7 @@ function resolve(dir) {
 
 module.exports = {
   devServer: {
-    https: true,
+    // https: true,
   },
   // resolve: {
   //   alias: {
