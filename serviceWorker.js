@@ -53,23 +53,22 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener("fetch", function (e) {
-    console.log(e, 'fetch')
-    // 有网络的情况下 优先网络
+    console.log(e, 'fetch');
     let cloneRequest = e.request.clone()
     e.respondWith(
-         fetch(cloneRequest).then(response => {
-            let cloneResponse = response.clone()
-            caches.open(cacheName).then(cache => {
-                cache.put(e.request, cloneResponse)
-            });
-            console.log('network online')
-            return response
-        }).catch(() => {
-            console.log('network offline, use cache')
-            return caches.match(e.request)
-        })
-    )
-
+        fetch(cloneRequest).then(response => {
+           let cloneResponse = response.clone()
+           caches.open(cacheName).then(cache => {
+               console.log("res", cloneResponse)
+               cache.put(e.request, cloneResponse)
+           });
+           console.log('network online')
+           return response
+       }).catch(() => {
+           console.log('network offline, use cache')
+           return caches.match(e.request)
+       })
+   )
 })
 
 
