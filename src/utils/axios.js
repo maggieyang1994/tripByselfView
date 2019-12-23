@@ -11,17 +11,20 @@ const pageMap = {
 // 携带cookie 前端和后端同时设置才有效
 // Access-Control-Allow-Credentials:true  Access-Control-Allow-origin:http://localhost:8080
 axios.defaults.withCredentials = true
-
+axios.defaults.timeout = 0
 const http = (url, method,params) => {
-  let baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://triprecord-server.herokuapp.com';
-  // let baseURL = 'https://triprecord-server.herokuapp.com';
+  // let baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://triprecord-server.herokuapp.com';
+  let baseURL = 'https://fedev.me/api';
+  // let baseURL = 'http://localhost:5000'
   // 封装axios模块  实现统一错误处理 和loading 
 
 
   // 请求拦截
   axios.interceptors.request.use(config => {
     store.commit('setLoading', true);
-    config.headers['login_id'] = encodeURI(store.state.userInfo.name)
+    // console.log('before encodeURI', store.state.userInfo.name)
+    // console.log('encodeURI', encodeURI(store.state.userInfo.name))
+    // config.headers['login_id'] = encodeURI(store.state.userInfo.name)
     return config
   }, err => {
     router.push({name: 'error'})
