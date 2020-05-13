@@ -151,8 +151,9 @@ export default {
           trajectory: JSON.stringify(this.path),
           Calorie: this.Calories,
           speed: this.speed,
-          mark: this.remarks
-
+          mark: this.remarks,
+          startCode: `${this.path[0].R},${this.path[0].Q}`,
+          endCode: `${this.path[this.path.length - 1].R},${this.path[this.path.length - 1].Q}`,
         };
         myAxios("/trip/saveTrip", "post", params).then(res => {
           console.log(res);

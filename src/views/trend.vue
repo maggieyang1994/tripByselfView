@@ -44,7 +44,7 @@ export default {
     methods: {
       getXAxis(){
          let arr = [];
-         for(let i = 1; i<=7; i++){
+         for(let i = 0; i<7; i++){
            arr.unshift(dayjs().subtract(i, "d").format("MM-DD"))
          };
          return arr;

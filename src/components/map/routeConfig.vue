@@ -201,7 +201,7 @@ export default {
         AMap.event.addListener(autoComplete, "select", function(res) {
           self.ruleForm[key] = res.poi.name;
           // 保存经纬度
-          self.routeCoordinate[key] = [res.poi.location.Q, res.poi.location.P];
+          self.routeCoordinate[key] = [res.poi.location.R, res.poi.location.Q];
         });
       });
     },
@@ -237,7 +237,7 @@ export default {
             if (status === "error" || status === "no_data") {
               self.$message({
                 showClose: true,
-                message: "查不到信息，请修改起始路线",
+                message: result,
                 type: "error"
               });
             } else {
@@ -291,7 +291,7 @@ export default {
         userId: this.$store.state.userInfo.userId,
         type: "traffic",
         tripType: this.ruleForm.trafficType,
-        distance: this.panelMessage.trafficDistance,
+        distance: this.panelMessage.trafficDistance/1000,
         time: this.panelMessage.trafficTime,
         date: this.panelMessage.curDate,
         Calorie: this.Calories,

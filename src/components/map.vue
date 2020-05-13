@@ -42,27 +42,30 @@ export default {
   name: "y-map",
   components: {
     "y-tripStart": TripStart,
-    "y-routeConfig": routeConfig
+    "y-routeConfig": routeConfig,
   },
   props: {
     tripType: {
-      type: String
+      type: String,
     },
     center: {
-      type: Array
+      type: Array,
+      default: function() {
+        return [114.03201687283001, 22.52961046007];
+      },
     },
     showRoute: {
       type: Boolean,
-      default: false
+      default: false,
     },
     needPosition: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
-  
+
   data() {
-   return {
+    return {
       // mapColor: this.mapColor,
       map: null,
       address: "",
@@ -75,33 +78,33 @@ export default {
       marker: null,
       longitude: "",
       latitude: "",
-      showTripStart: false
+      showTripStart: false,
     };
   },
   methods: {
-    handleClick(){
-      if(this.buttonText === "开始"){
+    handleClick() {
+      if (this.buttonText === "开始") {
         this.buttonText = "结束";
-        this.showTripStart = true
-      } else if (this.buttonText === '结束'){
-        this.buttonText = '退出';
+        this.showTripStart = true;
+      } else if (this.buttonText === "结束") {
+        this.buttonText = "退出";
         this.$refs.tripStart.tripEnd(this);
-      }else {
-       this.buttonText = "开始";
-       this.$emit("backToTrip", this.$refs.tripStart.distance)
+      } else {
+        this.buttonText = "开始";
+        this.$emit("backToTrip", this.$refs.tripStart.distance);
       }
     },
-    handleColorChange(value){
+    handleColorChange(value) {
       this.map.setMapStyle(`amap://styles/${value}`);
     },
     async init() {
       var self = this;
-      let tempOption = {
+      this.map = new AMap.Map("map", {
         resizeEnable: true,
-        zoom: 17
-      }
-      if (self.center && self.center.length) tempOption.center = self.center
-      this.map = new AMap.Map("map", tempOption);
+        zoom: 17,
+        viewMode: "3D",
+        center: this.center,
+      });
       this.map.setMapStyle(`amap://styles/${this.$store.state.mapColor}`);
 
       // 添加缩小放大
@@ -112,9 +115,8 @@ export default {
       });
       // 初始定位
       // historyDetail 不需要getPosition
-      // this.needPosition && 
-      this.needPosition && this.getPosition();
-      
+      // this.needPosition &&
+      this.needPosition && (await this.getPosition());
     },
     async getPosition() {
       // 异步加载 插件geolocation 加载成功执行回掉
@@ -135,25 +137,30 @@ export default {
             buttonPosition: "LB",
             showButton: true,
             showMarker: false,
-            showCircle: false
+            showCircle: false,
           });
           self.map.addControl(geolocation);
-          geolocation.getCurrentPosition();
+          let res = geolocation.getCurrentPosition();
+          console.log(res);
           AMap.event.addListener(geolocation, "complete", onComplete);
           AMap.event.addListener(geolocation, "error", onError);
 
           function onComplete(data) {
             // 定位成功 开开始路线规划
-            self.loadRoute = true
+            self.loadRoute = true;
             self.address = data.formattedAddress;
-            self.district = data.addressComponent.district;
+            if (data.addressComponent) {
+              self.district = data.addressComponent.district;
+              self.addressComponent = JSON.parse(
+                JSON.stringify(data.addressComponent)
+              );
+              self.city = data.addressComponent.city;
+            }
+
             self.positioning = false;
-            self.addressComponent = JSON.parse(
-              JSON.stringify(data.addressComponent)
-            );
-            self.city = data.addressComponent.city;
-            self.latitude = data.position.P;
-            self.longitude = data.position.Q;
+
+            self.latitude = data.position.Q;
+            self.longitude = data.position.R;
             self.drawMarker(self.longitude, self.latitude);
             resolve();
             // self.routeFrom = self.district + self.addressComponent.street + self.addressComponent.township + self.addressComponent.streetNumber
@@ -165,7 +172,7 @@ export default {
             self.$message({
               showClose: true,
               message: "定位失败",
-              type: "error"
+              type: "error",
             });
             reject(data);
           }
@@ -178,7 +185,7 @@ export default {
       this.marker && this.map.remove(this.marker);
       this.marker = new AMap.Marker({
         position: new AMap.LngLat(long, lati), // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-        title: "你在这里"
+        title: "你在这里",
       });
 
       // 将创建的点标记添加到已有的地图实例：
@@ -187,22 +194,22 @@ export default {
     drawPolyline(path) {
       var self = this;
       // 先删除之前的折线
-      this.map.plugin("AMap.PolyEditor", function () {
+      this.map.plugin("AMap.PolyEditor", function() {
         self.polyline && self.map.remove(self.polyline);
         // 创建折线实例
         self.polyline = new AMap.Polyline({
           path,
           strokeWeight: 10, // 线条宽度s
-          strokeColor: '#fff', // 线条颜色
-          isOutline: true,	// 是否描边
-          outlineColor: 'red', // 描边颜色
+          strokeColor: "#fff", // 线条颜色
+          isOutline: true, // 是否描边
+          outlineColor: "red", // 描边颜色
           borderWeight: 2, // 描边宽度
-          lineJoin: 'round', // 折线拐点连接处样式
-          zIndex: 1000
+          lineJoin: "round", // 折线拐点连接处样式
+          zIndex: 1000,
         });
         // 将折线添加至地图实例
         self.map.add(self.polyline);
-      })
+      });
     },
   },
   created() {
@@ -220,15 +227,20 @@ export default {
       // init完毕之后  告诉其爸爸 init完成了
       self.$emit("update:isInit", false)
       self.loading = false;
-     
-    };
 
+      // this.map = new AMap.Map("app", {
+      //   resizeEnable: true,
+      //   zoom: 17,
+      //   viewMode: "3D",
+      //   center: [114.03201687283001, 22.52961046007],
+      // });
+    };
 
     // 监听来自mapPanel的事件
     this.$on('handleColorChange', this.handleColorChange);
     this.$on('getPosition', this.getPosition)
     this.$on('handerButtonClick', this.handleClick)
-  }
+  },
 };
 </script>
 <style scoped lang="scss">
@@ -239,29 +251,28 @@ export default {
     height: 100%;
     z-index: 0;
   }
-  .beginTripSelf{
+  .beginTripSelf {
     position: fixed;
     bottom: 80px;
     width: 40%;
     left: 50%;
     transform: translate(-50%);
     z-index: 4;
-    button{
+    button {
       display: inline-block;
       width: 100%;
     }
-  };
- 
+  }
 }
 
 // 动画
 .slide-enter-active {
-  animation: fade-in .5s;
+  animation: fade-in 0.5s;
 }
-@keyframes  fade-in{
+@keyframes fade-in {
   0% {
     height: 0;
-  } 
+  }
   50% {
     height: 50%;
   }
@@ -269,5 +280,4 @@ export default {
     height: 100%;
   }
 }
-
 </style>

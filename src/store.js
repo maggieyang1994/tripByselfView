@@ -13,7 +13,8 @@ export default new Vuex.Store({
     totalTrips: [],
     mathRoutes,
     // chrome 会自动将http转为https
-    ngixPath: 'https://fedev.me/images/'
+    // fedev.me to 腾讯云
+    ngixPath: 'https://trip-record-1302010797.cos.ap-guangzhou.myqcloud.com/'
   },
   mutations: {
     setUserInfo(state, data){

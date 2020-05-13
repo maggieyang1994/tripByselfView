@@ -3,7 +3,7 @@
     <div class="top">
       <el-button class="loginout" @click="loginout">退出登录</el-button>
       <el-card class="box-card">
-        <img :src="userInfo.img" class="userImage" style="width: 70px;height:70px"/>
+        <img :src="avatorUrl" class="userImage" style="width: 70px;height:70px"/>
         <div style="display:inline-block;margin-left:20px">
           <p>{{userInfo.name}}</p>
           <p>账号：{{userInfo.userName}}</p>
@@ -65,9 +65,13 @@ export default {
           count: 10
         }
       ],
-      fansMap: arr
+      fansMap: arr,
+      avatorUrl: null
       
     }
+  },
+  mounted(){
+    this.avatorUrl =  this.$store.state.ngixPath + "head.jpeg"
   },
   computed: {
     ...mapState([
