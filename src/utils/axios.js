@@ -14,7 +14,7 @@ axios.defaults.withCredentials = true
 axios.defaults.timeout = 0
 const http = (url, method,params) => {
   // let baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://triprecord-server.herokuapp.com';
-  let baseURL = 'https://fedev.me/api';
+  let baseURL = 'https://triprecord-server.herokuapp.com';
   // let baseURL = 'http://localhost:5000'
   // 封装axios模块  实现统一错误处理 和loading 
 
